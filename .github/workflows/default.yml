@@ -41,7 +41,7 @@ jobs:
           cat inventory
       - name: Remove conflicting github image packages
         run: |
-          apt-get -y remove mongodb-database-tools
+          sudo apt-get -y remove mongodb-database-tools
         continue-on-error: true
       - name: Environment
         run: |
