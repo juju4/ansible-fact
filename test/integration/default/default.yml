@@ -9,10 +9,10 @@
       when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 18)
     - name: Gather Facts
       setup:
-      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 18)
-    - name: Ubuntu Bionic+ | Enforce python3 for ansible
+      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 18)
+    - name: Ubuntu Bionic | Enforce python3 for ansible
       set_fact:
         ansible_python_interpreter: /usr/bin/python3
-      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 18)
+      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 18)
   roles:
     - juju4.fact
