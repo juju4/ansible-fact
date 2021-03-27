@@ -7,21 +7,41 @@
 
 - block:
 
-    - name: install systemd configuration
+    - name: install systemd fact-db configuration
       template:
-        src: "systemd-fact-{{ item }}.service.j2"
-        dest: "/lib/systemd/system/fact-{{ item }}.service"
+        src: "systemd-fact-db.service.j2"
+        dest: "/lib/systemd/system/fact-db.service"
         mode: '0644'
         backup: yes
       register: systemd
       ignore_errors: true
       notify:
         - reload systemd
-        - "restart fact-{{ item }}"
-      with_items:
-        - db
-        - backend
-        - frontend
+        - "restart fact-db"
+
+    - name: install systemd fact-backend configuration
+      template:
+        src: "systemd-fact-backend.service.j2"
+        dest: "/lib/systemd/system/fact-backend.service"
+        mode: '0644'
+        backup: yes
+      register: systemd
+      ignore_errors: true
+      notify:
+        - reload systemd
+        - "restart fact-backend"
+
+    - name: install systemd fact-frontend configuration
+      template:
+        src: "systemd-fact-frontend.service.j2"
+        dest: "/lib/systemd/system/fact-frontend.service"
+        mode: '0644'
+        backup: yes
+      register: systemd
+      ignore_errors: true
+      notify:
+        - reload systemd
+        - "restart fact-frontend"
 
   # when: ansible_service_mgr == 'systemd'
   when: >
