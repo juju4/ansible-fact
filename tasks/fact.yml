@@ -106,6 +106,12 @@
     - { re: '^        listen   443;', rep: '        listen   443 ssl;' }
     - { re: '^        ssl on;', rep: '        # ssl on;' }
   when: fact_nginx_shim
+- name: Github | touch /run/nginx.pid
+  file:
+    path: /run/nginx.pid
+    state: touch
+    mode: '0644'
+  when: fact_nginx_shim
 
 - name: Check if marker exists
   stat: path="{{ fact_root }}/.before_install_py"
