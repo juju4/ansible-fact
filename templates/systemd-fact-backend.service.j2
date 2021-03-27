@@ -29,8 +29,8 @@ ProtectSystem=full
 #ProtectKernelModules=yes
 #ProtectControlGroups=true
 #RestrictRealtime=true
-#RestrictNamespaces=~user mnt
-#LockPersonality=true
+RestrictNamespaces=~user mnt
+LockPersonality=true
 {% endif %}
 # AF_UNIX needed to reach mongod
 #RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
