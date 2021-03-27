@@ -1,6 +1,9 @@
 ---
 driver:
   name: lxd_cli
+  config:
+    security.nesting: true
+    security.privileged: true
 
 transport:
   name: sftp
@@ -28,6 +31,7 @@ provisioner:
 platforms:
   - name: ubuntu-20.04
   - name: ubuntu-18.04
+  - name: fedora-33
 
 suites:
   - name: default
