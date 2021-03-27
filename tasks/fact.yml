@@ -1,6 +1,12 @@
 ---
 
 # https://github.com/fkie-cad/FACT_core/blob/master/INSTALL.md
+- name: Debian | refresh apt cache
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: ansible_os_family == "Debian"
+
 - name: Update latest packages
   package:  # noqa package-latest
     name: '*'
