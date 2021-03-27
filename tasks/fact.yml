@@ -92,7 +92,9 @@
     backup: "{{ fact_backup | default(false) }}"
   with_items: "{{ fact_main_config }}"
   notify:
-    - restart fact services
+    - restart fact-db
+    - restart fact-backend
+    - restart fact-frontend
 
 - name: Check if marker exists
   stat: path="{{ fact_root }}/.before_install_py"
