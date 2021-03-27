@@ -37,6 +37,7 @@ jobs:
           cd $GITHUB_WORKSPACE/juju4.fact
           [ -f get-dependencies.sh ] && sh -x get-dependencies.sh
           { echo '[defaults]'; echo 'callback_whitelist = profile_tasks, timer'; echo 'roles_path = ../'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
+          { echo '[facthosts]'; echo 'localhost' } >> inventory
       - name: Environment
         run: |
           pwd
@@ -51,6 +52,9 @@ jobs:
       - name: idempotency run
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact && ansible-playbook -i localhost, --connection=local --become -vvv test/integration/default/default.yml ${ANSIBLE_EXTRA_VARS} | tee /tmp/idempotency.log | grep -q 'changed=0.*failed=0'  && (echo 'Idempotence test: pass' && exit 0)  || (echo 'Idempotence test: fail' && cat /tmp/idempotency.log && exit 0)
+      - name: Verify
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact && ansible-playbook -i inventory --connection=local --become -v molecule/default/verify.yml
       - name: On failure
         run: |
           ansible -i inventory --connection=local -m setup localhost
