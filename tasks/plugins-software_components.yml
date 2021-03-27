@@ -11,6 +11,6 @@
 
 # ?
 - name: extract software names
-  command: python3 -c "from internal.extract_os_names import extract_names; extract_names()"
+  command: python3 -c "from internal.extract_os_names import extract_names; extract_names()"  # noqa no-changed-when
   # FIXME!
   ignore_errors: true

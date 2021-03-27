@@ -3,9 +3,9 @@
 - name: Creates a cron file for statistics
   cron:
     name: "{{ item.n }}"
-    day: "{{ item.d | default(omit)"
-    minute: "{{ item.m | default(omit)"
-    hour: "{{ item.h | default(omit)"
+    day: "{{ item.d | default(omit) }}"
+    minute: "{{ item.m | default(omit) }}"
+    hour: "{{ item.h | default(omit) }}"
     user: "{{ item.u }}"
     job: "{{ item.job }}"
     cron_file: ansible_fact_statistics
