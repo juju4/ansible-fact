@@ -1,0 +1,49 @@
+---
+# handlers file for juju4.fact
+
+- name: reload systemd
+  systemd:
+    daemon_reload: yes
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
+- name: restart fact-db
+  service:
+    name: fact-db
+    state: restarted
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
+- name: restart fact-backend
+  service:
+    name: fact-backend
+    state: restarted
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
+- name: restart fact-frontend
+  service:
+    name: fact-frontend
+    state: restarted
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
+- name: users_and_passwords-update_password_list
+  command: python3 update_password_list.py
+  args:
+    chdir: "{{ fact_root }}/src/plugins/analysis/users_and_passwords/internal"

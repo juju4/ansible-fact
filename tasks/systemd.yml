@@ -1,0 +1,45 @@
+---
+
+- name: Debug | ansible_virtualization_type
+  debug: var=ansible_virtualization_type
+- name: Debug | ansible_service_mgr
+  debug: var=ansible_service_mgr
+
+- block:
+
+    - name: install systemd configuration
+      template:
+        src: "systemd-fact-{{ item }}.service.j2"
+        dest: "/lib/systemd/system/fact-{{ item }}.service"
+        mode: '0644'
+        backup: yes
+      register: systemd
+      ignore_errors: true
+      notify:
+        - reload systemd
+        - "restart fact-{{ item }}"
+      with_items:
+        - db
+        - backend
+        - frontend
+
+  # when: ansible_service_mgr == 'systemd'
+  when: >
+    (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 16) or
+    (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
+
+- meta: flush_handlers
+
+- name: enable and start fact systemd service
+  service:
+    name: "fact-{{ item }}"
+    enabled: "{{ fact_svc_enable | default(true) }}"
+    state: "{{ fact_svc_state | default('started') }}"
+  with_items:
+    - db
+    - backend
+    - frontend
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )

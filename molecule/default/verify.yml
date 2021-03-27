@@ -1,0 +1,164 @@
+---
+# This is an example playbook to execute Ansible tests.
+
+- name: Verify
+  hosts: facthosts
+  gather_facts: false
+  tasks:
+    - name: Check if needed pip packages are installed
+      command: "pip freeze"
+      changed_when: false
+      register: pip
+
+    - name: Validate pip packages
+      assert:
+        that: "item in pip.stdout"
+      with_items:
+        - distro
+
+    - name: Ensure main.cfg is present
+      stat:
+        path: /var/_fact/FACT_core/src/config/main.cfg
+      register: cfg
+    - name: Validate config present
+      assert:
+        that: cfg.stat.exists and cfg.stat.size != 0
+
+    - name: Ensure clamd socket is present
+      stat:
+        path: /var/run/clamav/clamd.ctl
+      register: ctl
+    - name: Validate clamd socket present
+      assert:
+        that: ctl.stat.exists and ctl.stat.issock
+
+    - name: Ensure python3 process is running
+      command: pgrep -u _fact python3
+      register: ps
+      changed_when: false
+      ignore_errors: true
+    - name: Validate ps output
+      assert:
+        that: ps.stdout
+      ignore_errors: true
+    - name: Ensure uwsgi process is running
+      command: pgrep -u _fact uwsgi
+      register: ps2
+      changed_when: false
+      ignore_errors: true
+    - name: Validate ps output
+      assert:
+        that: ps2.stdout
+    - name: Ensure ports are listening
+      wait_for:
+        host: "{{ item.h }}"
+        port: "{{ item.p }}"
+        timeout: 10
+      with_items:
+        - { h: localhost, p: 443 }
+        # fact
+        - { h: localhost, p: 5000 }
+        # mongodb custom
+        - { h: localhost, p: 27018 }
+
+    - name: Fetch localhost:9191 endpoint
+      uri:
+        url: https://localhost:9191
+        validate_certs: no
+        return_content: yes
+      register: web1
+      ignore_errors: true
+    - name: Validate localhost:9191 endpoint
+      assert:
+        that: >
+          "'sockets' in web1.content and 'workers' in web1.content"
+      when: False
+    - debug: var=web1
+
+    - name: Fetch localhost endpoint
+      uri:
+        url: https://localhost
+        validate_certs: no
+        return_content: yes
+      register: web2
+    - name: Validate localhost:9191 endpoint
+      assert:
+        that: >
+          "'<title>FACT</title>' in web2.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web2.content"
+    - debug: var=web2
+
+    - name: Fetch localhost:5000 endpoint
+      uri:
+        url: https://localhost:5000
+        validate_certs: no
+        return_content: yes
+      register: web3
+      ignore_errors: true
+    - name: Validate localhost:5000 endpoint
+      assert:
+        that: >
+          "'<title>FACT</title>' in web3.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web3.content"
+      when: false
+    - debug: var=web3
+
+    - name: Fetch localhost:5000/system_health endpoint
+      uri:
+        url: https://localhost:5000/system_health
+        validate_certs: no
+        return_content: yes
+      register: web4
+      ignore_errors: true
+    - name: Validate localhost:5000/system_health endpoint
+      assert:
+        that: >
+          "'<h5 class=\"card-title\">frontend status</h5>' in web4.content and '<h5 class=\"card-title\">backend status</h5>' in web4.content"
+      when: false
+    - debug: var=web4
+
+    - name: Fetch localhost/system_health endpoint
+      uri:
+        url: https://localhost/system_health
+        validate_certs: no
+        return_content: yes
+      register: web4b
+    - name: Validate localhost:5000/system_health endpoint
+      assert:
+        that: >
+          "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
+    - debug: var=web4b
+
+    - name: Fetch content of /var/log/fact/fact_main.log
+      slurp:
+        src: /var/log/fact/fact_main.log
+      register: log1
+      become: yes
+    # FIXME/BUG: not validating correctly
+    - name: Validate /var/log/fact/fact_main.log
+      assert:
+        that: >
+          "'ERROR' not in (log1['content'] | b64decode) and
+          'WARNING' not in (log1['content'] | b64decode)"
+
+    - name: Fetch content of /var/log/fact/fact_mongo.log
+      slurp:
+        src: /var/log/fact/fact_mongo.log
+      register: log2
+      become: yes
+    - name: Validate /var/log/fact/fact_mongo.log
+      assert:
+        that: >
+          "'MongoDB starting :' in log2['content'] | b64decode and
+          'Permission denied' not in log2['content'] | b64decode"
+
+    - name: Get /tmp properties
+      stat:
+        path: /tmp
+      register: tmp
+    - name: Validate /tmp
+      assert:
+        that: >
+          tmp.stat.exists and tmp.stat.isdir and tmp.stat.mode == '1777'
+
+# test?
+# way to submit file from cli? or makes any validation operational?
+# ex: https://github.com/praetorian-inc/DVRF/blob/master/Firmware/DVRF_v03.bin

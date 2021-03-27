@@ -1,0 +1,18 @@
+---
+galaxy_info:
+  role_name: fact
+  author: juju4
+  description: The Firmware Analysis and Comparison Tool (FACT)
+  license: BSD
+  min_ansible_version: 2.1
+  platforms:
+    - name: Ubuntu
+      versions:
+        - bionic
+        - focal
+  galaxy_tags:
+    - security
+    - firmware
+    - analysis
+dependencies:
+  - geerlingguy.docker

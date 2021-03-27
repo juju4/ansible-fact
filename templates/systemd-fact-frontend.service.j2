@@ -1,0 +1,57 @@
+{{ ansible_managed | comment }}
+[Unit]
+Description=Fact frontend service
+Requires=network.target
+
+[Service]
+Type=simple
+ExecStart={{ fact_root }}/src/start_fact_frontend.py
+WorkingDirectory={{ fact_root }}
+Restart=on-failure
+RestartSec=30
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=fact-frontend
+User={{ fact_user }}
+Group={% if ansible_os_family == "RedHat" %}nobody{% else %}nogroup{% endif %}
+
+NoNewPrivileges=yes
+# Reduce Attack Surface
+PrivateTmp=true
+PrivateDevices=yes
+ProtectHome=yes
+ProtectSystem=full
+{% if (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int > 7) or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 18) %}
+## /proc needed, at minimum for /var/_fact/FACT_core/src/helperFunctions/program_setup.py:89
+#InaccessiblePaths=/proc
+ProtectKernelTunables=true
+ProtectKernelModules=yes
+ProtectControlGroups=true
+RestrictRealtime=true
+RestrictNamespaces=~user mnt
+LockPersonality=true
+{% endif %}
+# AF_UNIX needed to reach mongod
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+{% if not (ansible_virtualization_type is defined and
+          ansible_virtualization_type == "docker"
+        )
+%}
+{% if (ansible_os_family == 'RedHat' and ansible_distribution_major_version|int >= 8) or (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int > 18) %}
+SystemCallFilter=@system-service
+{% endif %}
+SystemCallFilter=~@debug @mount @cpu-emulation @obsolete @privileged
+# When system call is disallowed, return error code instead of killing process
+SystemCallErrorNumber=EPERM
+{% endif %}
+CPUShares={{ fact_cgroups_cpushares | default('1024') }}
+CPUQuota={{ fact_cgroups_cpuquota | default('80%') }}
+MemoryLimit={{ fact_cgroups_memorylimit | default('64G') }}
+
+# Network restrictions
+IPAddressAllow={{ fact_ipaddressallow | default('10.0.0.0/8 192.168.1.0/24 localhost') }}
+IPAddressDeny=any
+
+[Install]
+WantedBy=multi-user.target
+

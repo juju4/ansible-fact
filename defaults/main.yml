@@ -1,0 +1,40 @@
+---
+# defaults file for juju4.fact
+
+fact_user: _fact
+fact_home: /var/_fact
+fact_root: /var/_fact/FACT_core
+fact_logdir: /var/log/fact
+fact_datadir: /media/data
+
+fact_docker_images:
+  - crazymax/linguist
+  - nginx:alpine
+  - fkiecad/cwe_checker
+  - fkiecad/fact_extractor
+  - fkiecad/ghidra_headless_base:9.2.1
+  - fkiecad/fact_pdf_report
+  - fkiecad/radare-web-gui
+  - fkiecad/qemu_user:qemu-3.0.1
+  ## locally build
+  # - input-vectors
+  # - fact/qemu
+  # - fact/format_string_resolver
+  # - radare_server
+
+# fact_authentication_enabled: true
+fact_ipaddressallow: '10.0.0.0/8 192.168.1.0/24 localhost'
+# this is syslog log written by rsyslogd.
+# if want to put in fact_logdir, syslog user need to be able to write there.
+fact_syslog_target: /var/log/fact.log
+
+# mostly from default src/main.cfg
+fact_main_config:
+  - {s: data_storage, o: db_admin_user, v: fact_admin}
+  - {s: data_storage, o: db_admin_pw, v: 6fJEb5LkV2hRtWq0}
+  - {s: data_storage, o: db_readonly_user, v: fact_readonly}
+  - {s: data_storage, o: db_readonly_pw, v: RFaoFSr8b6BMSbzt}
+  - {s: data_storage, o: password_salt, v: '5up3r5tr0n6_p455w0rd_5417'}
+  - {s: Logging, o: logFile, v: "{{ fact_logdir }}/fact_main.log"}
+  - {s: Logging, o: mongoDbLogFile, v: "{{ fact_logdir }}/fact_mongo.log"}
+  - {s: data_storage, o: logLevel, v: WARNING}

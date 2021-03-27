@@ -1,0 +1,111 @@
+---
+
+# https://github.com/fkie-cad/FACT_core/blob/master/INSTALL.md
+- name: Update latest packages
+  package:
+    name: '*'
+    state: latest
+
+- name: Ensure dependencies packages are present
+  package:
+    name: "{{ fact_pkgs }}"
+    state: present
+
+- name: Ensure dedicated user exists
+  user:
+    name: _fact
+    home: "{{ fact_home }}"
+    comment: 'Firmware Analysis and Comparison Tool (FACT)'
+    system: yes
+    groups: docker
+    append: yes
+    state: present
+
+- name: give sudoers access to fact user - at least for install
+  lineinfile:
+    dest: /etc/sudoers.d/fact-user
+    line: "{{ fact_user }} ALL=(ALL) NOPASSWD:ALL"
+    mode: '0440'
+    create: yes
+    backup: "{{ fact_backup | default(false) }}"
+
+- name: clone FACT repository
+  git:
+    repo: https://github.com/fkie-cad/FACT_core.git
+    dest: "{{ fact_root }}"
+    version: "{{ fact_version | default('v3.1.3') }}"
+    update: no
+    force: no
+  become: yes
+  become_user: "{{ fact_user }}"
+
+- name: Ensure directories exist
+  file:
+    path: "{{ item.p }}"
+    state: directory
+    owner: "{{ fact_user }}"
+    mode: "{{ item.m }}"
+  with_items:
+    - { p: "{{ fact_datadir }}", m: '0700' }
+    - { p: "{{ fact_logdir }}", m: '0700' }
+    - { p: "{{ fact_root }}/src/bin", m: '0700' }
+
+- name: FACT pre-install | pip dependencies
+  pip:
+    name:
+      - pip
+      - virtualenv
+      - distro
+      - python-magic
+      - requests
+      - docker
+      - git+https://github.com/fkie-cad/common_helper_files.git
+      - git+https://github.com/fkie-cad/common_helper_process.git
+    executable: pip3
+    extra_args: --upgrade
+
+- name: Pull Docker images
+  docker_image:
+    name: "{{ item }}"
+    source: pull
+  with_items: "{{ fact_docker_images }}"
+
+- name: Ensure dependencies services are started
+  service:
+    name: clamav-daemon
+    state: started
+
+# review src/config/main.cfg, src/config/mongod.conf
+- name: Update config
+  ini_file:
+    path: "{{ fact_root }}/src/config/main.cfg"
+    section: "{{ item.s }}"
+    option: "{{ item.o }}"
+    value: "{{ item.v }}"
+    mode: '0600'
+    backup: "{{ fact_backup | default(false) }}"
+  with_items: "{{ fact_main_config }}"
+  notify:
+    - restart fact services
+
+- name: Check if marker exists
+  stat: path="{{ fact_root }}/.before_install_py"
+  register: mark
+- name: marker
+  file:
+    path: "{{ fact_root }}/.before_install_py"
+    state: touch
+  when: not mark.stat.exists
+
+- name: FACT install - python way
+  shell: "{{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log"
+  args:
+    chdir: "{{ fact_root }}"
+    creates: "{{ fact_root }}/src/objects/__pycache__"
+  become: yes
+  become_user: "{{ fact_user }}"
+  # notify:
+  #   - remove sudo access
+  # when: false
+
+- import_tasks: systemd.yml
