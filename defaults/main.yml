@@ -38,3 +38,5 @@ fact_main_config:
   - {s: Logging, o: logFile, v: "{{ fact_logdir }}/fact_main.log"}
   - {s: Logging, o: mongoDbLogFile, v: "{{ fact_logdir }}/fact_mongo.log"}
   - {s: data_storage, o: logLevel, v: WARNING}
+
+fact_nginx_shim: false

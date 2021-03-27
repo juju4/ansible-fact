@@ -96,6 +96,17 @@
     - restart fact-backend
     - restart fact-frontend
 
+- name: Github | review nginx.conf
+  replace:
+    dest: "{{ fact_root }}/src/config/nginx.conf"
+    regexp: "{{ item.re }}"
+    replace: "{{ item.rep }}"
+    mode: '0644'
+  with_items:
+    - { re: '^        listen   443;', rep: '        listen   443 ssl;' }
+    - { re: '^        ssl on;', rep: '        # ssl on;' }
+  when: fact_nginx_shim
+
 - name: Check if marker exists
   stat: path="{{ fact_root }}/.before_install_py"
   register: mark
