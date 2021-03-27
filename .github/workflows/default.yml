@@ -95,3 +95,12 @@ jobs:
           cat /var/_fact/FACT_core/src/config/mongod.conf || true
         if: ${{ always() }}
         continue-on-error: true
+      - name: After script - nginx
+        run: |
+          find /etc/nginx -type f -ls
+          ls -la /etc/nginx/nginx.conf
+          cat /etc/nginx/nginx.conf || true
+          nginx -V
+          nginx -t
+        if: ${{ always() }}
+        continue-on-error: true
