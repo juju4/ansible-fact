@@ -37,7 +37,8 @@ jobs:
           cd $GITHUB_WORKSPACE/juju4.fact
           [ -f get-dependencies.sh ] && sh -x get-dependencies.sh
           { echo '[defaults]'; echo 'callback_whitelist = profile_tasks, timer'; echo 'roles_path = ../'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
-          { echo '[facthosts]'; echo 'localhost' } >> inventory
+          { echo '[facthosts]'; echo 'localhost'; } >> inventory
+          cat inventory
       - name: Environment
         run: |
           pwd
