@@ -65,7 +65,7 @@ jobs:
           df -h
       - name: Free disk space
         run: |
-          rm -Rf /usr/local/lib/android
+          sudo rm -Rf /usr/local/lib/android
           df -h
       - name: Install lxd requirements
         run: |
