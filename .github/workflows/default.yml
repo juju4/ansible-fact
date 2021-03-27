@@ -99,8 +99,9 @@ jobs:
         run: |
           find /etc/nginx -type f -ls
           ls -la /etc/nginx/nginx.conf
+          ls -la /run/
           cat /etc/nginx/nginx.conf || true
-          nginx -V
-          nginx -t
+          sudo nginx -V
+          sudo nginx -t
         if: ${{ always() }}
         continue-on-error: true
