@@ -62,6 +62,7 @@ jobs:
           pwd
           env
           find -ls
+          df -h
       - name: Install lxd requirements
         run: |
           sudo apt-get update -qq
@@ -143,6 +144,7 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'host www.google.com' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ping -c 1 www.google.com' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ping -c 1 8.8.8.8' || true
+          df -h
         if: ${{ failure() }}
         continue-on-error: true
       - name: After script - systemd
