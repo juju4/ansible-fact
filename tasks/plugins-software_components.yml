@@ -1,0 +1,16 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/software_components/install.sh
+
+- name: Build fact/format_string_resolver image
+  docker_image:
+    name: fact/format_string_resolver
+    build:
+      path: "{{ fact_root }}/src/plugins/analysis/software_components/docker"
+      pull: no
+    source: build
+
+# ?
+- name: extract software names
+  command: python3 -c "from internal.extract_os_names import extract_names; extract_names()"
+  # FIXME!
+  ignore_errors: true

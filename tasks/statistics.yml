@@ -1,0 +1,14 @@
+---
+
+- name: Creates a cron file for statistics
+  cron:
+    name: "{{ item.n }}"
+    day: "{{ item.d | default(omit)"
+    minute: "{{ item.m | default(omit)"
+    hour: "{{ item.h | default(omit)"
+    user: "{{ item.u }}"
+    job: "{{ item.job }}"
+    cron_file: ansible_fact_statistics
+  with_items:
+    - { n: update_statistic, m: 0, u: _fact, job: '/var/_fact/FACT_core/src/update_statistic.py > /dev/null 2>&1' }
+    - { n: update_variety_data, m: 30, h: 0, d: 0, u: _fact, job: '/var/_fact/FACT_core/src/update_variety_data.py > /dev/null 2>&1' }

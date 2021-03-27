@@ -1,0 +1,160 @@
+---
+# This should mirror cloud filtering options like Azure NSG
+# but may be better for local monitoring
+# FIXME! need to call iptables-save to have persistent rules
+
+- name: Allow inbound loopback
+  iptables:
+    chain: INPUT
+    in_interface: lo
+    jump: ACCEPT
+
+- name: Allow related and established connections
+  iptables:
+    chain: INPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Allow new incoming SYN packets on TCP port 22 (SSH)
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    source: "{{ item }}"
+    destination_port: '22'
+    ctstate: NEW
+    syn: match
+    jump: ACCEPT
+    comment: Accept new SSH connections.
+  loop: "{{ fact_sys_fw_rules_ssh_in }}"
+
+- name: Allow new incoming web packets (HTTP+HTTPS)
+  iptables:
+    chain: INPUT
+    protocol: tcp
+    destination_port: "{{ item | string }}"
+    ctstate: NEW
+    syn: match
+    jump: ACCEPT
+    comment: Accept new web connections.
+  loop:
+    - 80
+    - 443
+
+- name: Allow outbound loopback
+  iptables:
+    chain: OUTPUT
+    out_interface: lo
+    jump: ACCEPT
+
+- name: Allow related and established outbound connections
+  iptables:
+    chain: OUTPUT
+    ctstate: ESTABLISHED,RELATED
+    jump: ACCEPT
+
+- name: Allow outgoing DNS packets
+  iptables:
+    chain: OUTPUT
+    protocol: "{{ item }}"
+    destination_port: '53'
+    jump: ACCEPT
+    comment: Accept outbound dns connections.
+  loop:
+    - tcp
+    - udp
+
+- name: System | Allow outgoing system updates and activities
+  iptables:
+    chain: OUTPUT
+    protocol: "{{ item.0.proto }}"
+    destination: "{{ item.0.dst }}"
+    destination_port: "{{ item.1 }}"
+    jump: ACCEPT
+    comment: Accept outbound system
+  loop: "{{ fact_sys_fw_rules_outbound | subelements('ports') }}"
+
+- name: Allow outgoing web packets (HTTP+HTTPS) per user
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    destination_port: "{{ item.1 }}"
+    uid_owner: "{{ item.0.uid }}"
+    ctstate: NEW
+    syn: match
+    jump: ACCEPT
+    comment: Accept outbound web connections.
+  loop: "{{ fact_user_fw_rules_outbound_tcp | subelements('ports') }}"
+
+- name: Allow outgoing udp per user
+  iptables:
+    chain: OUTPUT
+    protocol: udp
+    uid_owner: "{{ item.uid }}"
+    jump: ACCEPT
+    comment: Accept outbound udp connections.
+  loop: "{{ fact_user_fw_rules_outbound_udp }}"
+
+# https://medium.com/opsops/custom-chains-in-iptables-with-ansible-753c46eaa664
+# https://github.com/ansible/ansible/issues/25099
+- name: Get existing iptables rules
+  command: iptables -n -L
+  changed_when: false
+  register: iptables_rules
+
+- name: Create custom iptables chain
+  command: iptables -N 'LOG_ACCEPT'
+  when: "'Chain LOG_ACCEPT' not in iptables_rules.stdout"
+
+- name: Rule Log and accept 1
+  iptables:
+    chain: LOG_ACCEPT
+    jump: LOG
+    comment: Log and accept
+    limit: 5/second
+    limit_burst: '20'
+    log_prefix: "IPTABLES:INFO: "
+    log_level: info
+
+- name: Rule Log and accept 2
+  iptables:
+    chain: LOG_ACCEPT
+    jump: ACCEPT
+    comment: Log and accept 2
+
+- name: Allow output tcp
+  iptables:
+    chain: OUTPUT
+    protocol: tcp
+    ctstate: NEW
+    syn: match
+    jump: LOG_ACCEPT
+    comment: Accept output tcp.
+
+- name: Allow output udp
+  iptables:
+    chain: OUTPUT
+    protocol: udp
+    jump: LOG_ACCEPT
+    comment: Accept output udp.
+
+- name: Allow input
+  iptables:
+    chain: INPUT
+    protocol: udp
+    jump: LOG_ACCEPT
+    comment: Accept input.
+
+- name: Set the default policy for the INPUT chain
+  iptables:
+    chain: INPUT
+    policy: "{{ fact_fw_input_default }}"
+
+- name: Set the default policy for the OUTPUT chain
+  iptables:
+    chain: OUTPUT
+    policy: "{{ fact_fw_output_default }}"
+
+# - name: Install iptables-persistent
+#   package:
+#     name: iptables-persistent
+#     state: present

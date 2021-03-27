@@ -1,0 +1,9 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/input_vectors/install.sh
+
+- name: Build input_vectors docker image
+  docker_image:
+    name: input-vectors
+    build:
+      path: "{{ fact_root }}/src/plugins/analysis/input_vectors"
+    source: build

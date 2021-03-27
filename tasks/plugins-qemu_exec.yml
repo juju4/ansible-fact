@@ -1,0 +1,57 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/qemu_exec/install.sh
+
+- name: Build qemu_exec image
+  docker_image:
+    name: fact/qemu:latest
+    build:
+      path: "{{ fact_root }}/src/plugins/analysis/qemu_exec/docker"
+    # args:
+    #   http_proxy
+    #   https_proxy
+    #   HTTP_PROXY
+    #   HTTPS_PROXY
+    source: build
+
+# get files for testing dynamically linked binary
+- name: Check if test libc6-mips present
+  stat:
+    path: "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir/lib/libc.so.6"
+  register: libc6m
+- block:
+    - name: Download libc6-mips deb
+      get_url:
+        url: http://de.archive.ubuntu.com/ubuntu/pool/universe/c/cross-toolchain-base-ports/libc6-mips-cross_2.23-0ubuntu3cross1_all.deb
+        dest: /tmp/libc6-mips-cross_2.23-0ubuntu3cross1_all.deb
+        mode: '0600'
+    - name: Extract libc6-mips deb
+      command: ar xf /tmp/libc6-mips-cross_2.23-0ubuntu3cross1_all.deb
+      args:
+        chdir: /tmp
+        creates: /tmp/data.tar.xz
+    - name: Extract libc6-mips deb data.tar.xz
+      unarchive:
+        src: /tmp/data.tar.xz
+        dest: /tmp/l
+        mode: '0755'
+        remote_src: yes
+    - name: Ensure directories exist
+      file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      with_items:
+        - "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir/lib"
+        - "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir_2/fact_extracted/lib"
+    - name: copy few libc6-mips deb files
+      copy:
+        src: "{{ item.s }}"
+        dest: "{{ item.d }}"
+        remote_src: yes
+        mode: '0644'
+      with_items:
+        - { s: /tmp/l/usr/mips-linux-gnu/lib/libc-2.23.so, d: "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir/lib/libc.so.6" }
+        - { s: /tmp/l/usr/mips-linux-gnu/lib/ld-2.23.so, d: "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir/lib/ld.so.1" }
+        - { s: /tmp/l/usr/mips-linux-gnu/lib/libc-2.23.so, d: "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir_2/fact_extracted/lib/libc.so.6" }
+        - { s: /tmp/l/usr/mips-linux-gnu/lib/ld-2.23.so, d: "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir_2/fact_extracted/lib/ld.so.1" }
+  when: not libc6m.stat.exists

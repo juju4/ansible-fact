@@ -1,0 +1,37 @@
+---
+
+- name: Ensure rsyslog is present
+  package:
+    name: rsyslog
+    state: present
+  register: pkg_result
+  until: pkg_result is success
+
+- name: Gather package facts
+  package_facts:
+    manager: auto
+
+- name: get rsyslog version
+  set_fact:
+    rsyslog_v: "{{ ansible_facts.packages['rsyslog'][0]['version'] }}"
+
+- debug: var=rsyslog_v verbosity=1
+
+- name: Ensure base directory exists
+  file:
+    dest: "{{ fact_syslog_target | dirname }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ fact_user }}"
+  when: >
+    "'/var/log/' in fact_syslog_target" and
+    fact_syslog_target|dirname != '/var/log'
+
+- name: setup rsyslog to send fact logs to a specific target
+  template:
+    src: rsyslog-fact.conf.j2
+    dest: /etc/rsyslog.d/30-fact.conf
+    mode: '0644'
+    backup: yes
+  notify:
+    - restart rsyslog

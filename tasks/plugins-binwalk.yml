@@ -1,0 +1,25 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/binwalk/install.sh
+
+- name: Install binwalk package dependencies
+  package:
+    name: "{{ fact_binwalk_pkgs }}"
+    state: present
+
+- name: Install binwalk pip dependencies
+  pip:
+    name:
+      - matplotlib
+      - capstone
+    state: present
+
+- name: Install cstruct pip dependency
+  pip:
+    name: cstruct
+    version: '1.0'
+    state: present
+
+- name: Install binwalk
+  pip:
+    name: git+https://github.com/jstucke/binwalk.git@fix-entropy-graph-legend
+    state: present

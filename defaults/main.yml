@@ -40,3 +40,59 @@ fact_main_config:
   - {s: data_storage, o: logLevel, v: WARNING}
 
 fact_nginx_shim: false
+
+fact_firewall_enable: true
+# fact_fw_input_default: ACCEPT
+# fact_fw_output_default: ACCEPT
+# There is a Log and Accept rule at the end so this should not be impacting
+fact_fw_input_default: DROP
+fact_fw_output_default: DROP
+fact_sys_fw_rules_ssh_in:
+  - 127.0.0.1
+fact_sys_fw_rules_outbound:
+  - dst: 91.189.95.85  # ganondorf.canonical.com
+    ports: ['80', '443']
+    proto: tcp
+  - dst: 91.189.89.199  # golem.canonical.com
+    ports: ['80', '443']
+    proto: tcp
+  - dst: 91.189.89.199  # golem.canonical.com
+    ports: ['123']
+    proto: udp
+  - dst: 91.189.88.152  # actiontoad.canonical.com
+    ports: ['80', '443']
+    proto: tcp
+  - dst: 91.189.88.142  # aerodent.canonical.com
+    ports: ['80', '443']
+    proto: tcp
+  - dst: 91.189.91.157  # alphyn.canonical.com
+    ports: ['123']
+    proto: udp
+  - dst: 91.189.89.198  # chilipepper.canonical.com
+    ports: ['123']
+    proto: udp
+  # If Azure
+  # https://docs.microsoft.com/en-us/azure/virtual-network/what-is-ip-address-168-63-129-16
+  # https://github.com/MicrosoftDocs/azure-docs/blob/master/articles/virtual-network/what-is-ip-address-168-63-129-16.md
+  - dst: 168.63.129.16
+    ports: ['80', '32526']
+    proto: tcp
+  # ?
+  - dst: 51.11.236.225  # AS8075 Microsoft
+    ports: ['80', '443']
+    proto: tcp
+fact_user_fw_rules_outbound_tcp:
+  # _fact
+  - uid: 997
+    ports: ['80', '443']
+  # clamav
+  - uid: 113
+    ports: ['80', '443']
+  # root
+  - uid: 0
+    ports: ['80', '443']
+fact_user_fw_rules_outbound_udp:
+  # _fact
+  - uid: 997
+  # root
+  - uid: 0

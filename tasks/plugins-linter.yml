@@ -1,0 +1,28 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/linter/install.sh
+
+- name: Install linter package dependencies
+  package:
+    name: "{{ fact_linter_pkgs }}"
+    state: present
+
+- name: Install lua dependencies
+  command: "luarocks install {{ item }}"
+  args:
+    creates: "/usr/local/lib/luarocks/rocks/{{ item }}"
+  with_items:
+    - luafilesystem
+    - argparse
+    - luacheck
+
+- name: Install linter pip dependencies
+  pip:
+    name:
+      - pylint
+    state: present
+
+- name: Install npm dependency
+  npm:
+    name: jshint
+    global: yes
+    state: present

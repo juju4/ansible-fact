@@ -1,0 +1,41 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/ip_and_uri_finder/install.sh
+
+- name: Install ip_and_uri_finder pip dependencies
+  pip:
+    name:
+      # - git+https://github.com/fkie-cad/common_analysis_ip_and_uri.git
+      - geoip2
+    state: present
+
+- name: Ensure bin/GeoLite2-City directory exists
+  file:
+    path: "{{ fact_root }}/src/plugins/analysis/ip_and_uri_finder/bin/GeoLite2-City"
+    state: directory
+    mode: '0755'
+
+- name: Download GeoLite2-City
+  get_url:
+    url: https://github.com/codeqq/geolite2-city-mirror/raw/master/GeoLite2-City.tar.gz
+    dest: "{{ fact_root }}/src/plugins/analysis/ip_and_uri_finder/bin/"
+    checksum: "sha256:a5935180d9160f781831bf52d8c1b1784b6424dccef10c2e513ccab338801aa5"
+    mode: '0600'
+
+- name: Extract GeoLite2-City archive
+  unarchive:
+    src: "{{ fact_root }}/src/plugins/analysis/ip_and_uri_finder/bin/GeoLite2-City.tar.gz"
+    dest: "{{ fact_root }}/src/plugins/analysis/ip_and_uri_finder/bin/GeoLite2-City"
+    mode: '0755'
+    remote_src: yes
+    # Ansible module does not handle this well. doing symlinks.
+    # extra_opts:
+    #   - --strip-components 1
+
+- name: Add symlinks
+  file:
+    src: "{{ item.s }}"
+    dest: "{{ item.d }}"
+    state: link
+    mode: '0755'
+  with_items:
+    - { s: "{{ fact_root }}/src/plugins/analysis/ip_and_uri_finder/bin/GeoLite2-City/GeoLite2-City_20191029/GeoLite2-City.mmdb", d: "{{ fact_root }}/src/plugins/analysis/ip_and_uri_finder/bin/GeoLite2-City/GeoLite2-City.mmdb" }

@@ -1,0 +1,12 @@
+---
+
+- name: Ensure appropriate directories for mongodb
+  file:
+    path: "{{ item.p }}"
+    mode: "{{ item.m }}"
+    owner: "{{ item.o }}"
+    state: directory
+  with_items:
+    - { p: /tmp, m: '1777', o: root }
+    - { p: /media/data/fact_wt_mongodb, m: '0744', o: "{{ fact_user }}" }
+    - { p: /media/data/fact_auth_data, m: '0744', o: "{{ fact_user }}" }

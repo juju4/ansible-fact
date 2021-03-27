@@ -35,6 +35,13 @@
     create: yes
     backup: "{{ fact_backup | default(false) }}"
 
+- name: Ensure /etc/sudoers.d/fact_overrides exists
+  template:
+    src: fact_overrides.j2
+    dest: /etc/sudoers.d/fact_overrides
+    mode: '0440'
+    backup: "{{ fact_backup | default(false) }}"
+
 - name: clone FACT repository
   git:
     repo: https://github.com/fkie-cad/FACT_core.git
@@ -56,17 +63,16 @@
     - { p: "{{ fact_logdir }}", m: '0700' }
     - { p: "{{ fact_root }}/src/bin", m: '0700' }
 
+- name: copy pip requirements file
+  copy:
+    src: requirements.txt
+    dest: "{{ fact_home }}/requirements.txt"
+    mode: '0600'
+
+# better in virtualenv?
 - name: FACT pre-install | pip dependencies
   pip:
-    name:
-      - pip
-      - virtualenv
-      - distro
-      - python-magic
-      - requests
-      - docker
-      - git+https://github.com/fkie-cad/common_helper_files.git
-      - git+https://github.com/fkie-cad/common_helper_process.git
+    requirements: "{{ fact_home }}/requirements.txt"
     executable: pip3
     extra_args: --upgrade
 
@@ -107,28 +113,20 @@
     - { re: '^        ssl on;', rep: '        # ssl on;' }
   when: fact_nginx_shim
 
-- name: Check if marker exists
-  stat: path="{{ fact_root }}/.before_install_py"
-  register: mark
-- name: marker
-  file:
-    path: "{{ fact_root }}/.before_install_py"
-    state: touch
-    mode: '0600'
-  when: not mark.stat.exists
+- import_tasks: plugins-binwalk.yml
+- import_tasks: plugins-linter.yml
+- import_tasks: plugins-crypto_hints.yml
+- import_tasks: plugins-oms.yml
+- import_tasks: plugins-software_components.yml
+- import_tasks: plugins-cve_lookup.yml
+- import_tasks: plugins-qemu_exec.yml
+- import_tasks: plugins-users_and_passwords.yml
+- import_tasks: plugins-ip_and_uri_finder.yml
+- import_tasks: plugins-input_vectors.yml
 
-- name: FACT install - python way
-  shell: |
-    set -o pipefail
-    {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
-  args:
-    chdir: "{{ fact_root }}"
-    creates: "{{ fact_root }}/src/objects/__pycache__"
-    executable: /bin/bash
-  become: yes
-  become_user: "{{ fact_user }}"
-  # notify:
-  #   - remove sudo access
-  # when: false
+- import_tasks: mongodb.yml
+- import_tasks: variety.yml
 
+- import_tasks: statistics.yml
+- import_tasks: rsyslog.yml
 - import_tasks: systemd.yml

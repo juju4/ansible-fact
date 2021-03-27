@@ -1,0 +1,20 @@
+---
+
+# Last update, Apr 2020
+- name: clone variety repository
+  git:
+    repo: https://github.com/variety/variety.git
+    dest: "{{ fact_root }}/variety"
+    version: "{{ fact_variety_version | default('2f4d815') }}"  # Aug 2016
+  become: yes
+  become_user: "{{ fact_user }}"
+
+- name: Add variety symlinks
+  file:
+    src: "{{ item.s }}"
+    dest: "{{ item.d }}"
+    state: link
+    mode: "{{ item.m }}"
+  with_items:
+    - { s: "{{ fact_root }}/variety/variety.js", d: "{{ fact_root }}/src/bin/variety.js", m: '0644' }
+    - { s: "{{ fact_root }}/variety/spec", d: "{{ fact_root }}/src/bin/spec", m: '0755' }

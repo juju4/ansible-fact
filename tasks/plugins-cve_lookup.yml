@@ -1,0 +1,15 @@
+---
+# https://github.com/fkie-cad/FACT_core/blob/master/src/plugins/analysis/cve_lookup/install.sh
+
+- name: Install cve_lookup pip dependencies
+  pip:
+    name:
+      - pyxdameraulevenshtein
+      - retry
+    state: present
+
+- name: Ensure database exists
+  command: python3 setup_repository.py
+  args:
+    creates: "{{ fact_root }}/src/plugins/analysis/cve_lookup/internal/cve_cpe.db"
+    chdir: "{{ fact_root }}/src/plugins/analysis/cve_lookup/internal"
