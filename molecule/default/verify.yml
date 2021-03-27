@@ -73,7 +73,8 @@
         that: >
           "'sockets' in web1.content and 'workers' in web1.content"
       when: False
-    - debug: var=web1
+    - name: Debug | web1
+      debug: var=web1
 
     - name: Fetch localhost endpoint
       uri:
@@ -85,7 +86,8 @@
       assert:
         that: >
           "'<title>FACT</title>' in web2.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web2.content"
-    - debug: var=web2
+    - name: Debug | web2
+      debug: var=web2
 
     - name: Fetch localhost:5000 endpoint
       uri:
@@ -99,7 +101,8 @@
         that: >
           "'<title>FACT</title>' in web3.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web3.content"
       when: false
-    - debug: var=web3
+    - name: Debug | web3
+      debug: var=web3
 
     - name: Fetch localhost:5000/system_health endpoint
       uri:
@@ -113,7 +116,8 @@
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4.content and '<h5 class=\"card-title\">backend status</h5>' in web4.content"
       when: false
-    - debug: var=web4
+    - name: Debug | web4
+      debug: var=web4
 
     - name: Fetch localhost/system_health endpoint
       uri:
@@ -125,7 +129,8 @@
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
-    - debug: var=web4b
+    - name: Debug | web4b
+      debug: var=web4b
 
     - name: Fetch content of /var/log/fact/fact_main.log
       slurp:

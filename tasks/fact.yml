@@ -2,7 +2,7 @@
 
 # https://github.com/fkie-cad/FACT_core/blob/master/INSTALL.md
 - name: Update latest packages
-  package:
+  package:  # noqa package-latest
     name: '*'
     state: latest
 
@@ -95,13 +95,17 @@
   file:
     path: "{{ fact_root }}/.before_install_py"
     state: touch
+    mode: '0600'
   when: not mark.stat.exists
 
 - name: FACT install - python way
-  shell: "{{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log"
+  shell: |
+    set -o pipefail
+    {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
   args:
     chdir: "{{ fact_root }}"
     creates: "{{ fact_root }}/src/objects/__pycache__"
+    executable: /bin/bash
   become: yes
   become_user: "{{ fact_user }}"
   # notify:
