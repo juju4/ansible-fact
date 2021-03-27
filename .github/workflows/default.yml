@@ -39,6 +39,10 @@ jobs:
           { echo '[defaults]'; echo 'callback_whitelist = profile_tasks, timer'; echo 'roles_path = ../'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
           { echo '[facthosts]'; echo 'localhost'; } >> inventory
           cat inventory
+      - name: Remove conflicting github image packages
+        run: |
+          apt-get -y remove mongodb-database-tools
+        continue-on-error: true
       - name: Environment
         run: |
           pwd
