@@ -29,20 +29,21 @@
       args:
         chdir: /tmp
         creates: /tmp/data.tar.xz
-    - name: Extract libc6-mips deb data.tar.xz
-      unarchive:
-        src: /tmp/data.tar.xz
-        dest: /tmp/l
-        mode: '0755'
-        remote_src: yes
     - name: Ensure directories exist
       file:
         path: "{{ item }}"
         state: directory
         mode: '0755'
       with_items:
+        - /tmp/l
         - "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir/lib"
         - "{{ fact_root }}/src/plugins/analysis/qemu_exec/test/data/test_tmp_dir_2/fact_extracted/lib"
+    - name: Extract libc6-mips deb data.tar.xz
+      unarchive:
+        src: /tmp/data.tar.xz
+        dest: /tmp/l
+        mode: '0755'
+        remote_src: yes
     - name: copy few libc6-mips deb files
       copy:
         src: "{{ item.s }}"
