@@ -7,6 +7,9 @@
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
+- import_tasks: redhat-mongodb.yml
+  when: ansible_os_family == "RedHat"
+
 - name: Update latest packages
   package:  # noqa package-latest
     name: '*'

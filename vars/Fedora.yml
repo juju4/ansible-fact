@@ -18,8 +18,9 @@ fact_pkgs:
   - unzip
   - clamav
   - clamav-update
-  # Not in Fedora repo per license change
+  # Not in Fedora repo per license change, using rhel8 upstream
   # - mongodb
+  - mongodb-org
 
 fact_binwalk_pkgs:
   - xorg-x11-server-Xvfb
