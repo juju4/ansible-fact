@@ -33,6 +33,21 @@ describe process('uwsgi') do
   its(:user) { should eq "_fact" }
 end
 
+describe service('fact-db') do
+  it { should be_enabled }
+  it { should be_running }
+end
+
+describe service('fact-backend') do
+  it { should be_enabled }
+  it { should be_running }
+end
+
+describe service('fact-frontend') do
+  it { should be_enabled }
+  it { should be_running }
+end
+
 describe port(5000) do
   it { should be_listening }
 end
@@ -67,6 +82,7 @@ end
 
 describe file("/var/log/fact/fact_mongo.log") do
   its(:size) { should > 0 }
+  its(:content) { should_not match /authentication failed/ }
   its(:content) { should_not match /ERROR/ }
   its(:content) { should_not match /WARNING/ }
 end

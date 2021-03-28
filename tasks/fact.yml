@@ -89,6 +89,7 @@
   service:
     name: clamav-daemon
     state: started
+  when: ansible_os_family == "Debian"
 
 # review src/config/main.cfg, src/config/mongod.conf
 - name: Update config

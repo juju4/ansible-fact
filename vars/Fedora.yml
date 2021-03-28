@@ -8,6 +8,7 @@ fact_pkgs:
   - python3-devel
   - automake
   - autoconf
+  - cmake
   - libtool
   - file-devel
   - libffi-devel
