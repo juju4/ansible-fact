@@ -45,11 +45,16 @@ end
 describe command("curl #{curl_args} #{fact_url}") do
   its(:stdout) { should match /<title>FACT<\/title>/ }
   its(:stdout) { should match /<h4 class="card-title mb-3">Latest Firmware Submissions<\/h4>/ }
+  its(:stdout) { should match /Browse Firmware/ }
+  its(:stdout) { should match /Browse Compares/ }
+  its(:stdout) { should match /Basic Search/ }
+  its(:stdout) { should_not match /Internal Server Error/ }
 end
 
 describe command("curl #{curl_args} #{fact_url}/system_health") do
   its(:stdout) { should match /<h5 class="card-title">frontend status<\/h5>/ }
   its(:stdout) { should match /<h5 class="card-title">backend status<\/h5>/ }
+  its(:stdout) { should_not match /Internal Server Error/ }
 end
 
 describe file("/var/log/fact/fact_main.log") do
