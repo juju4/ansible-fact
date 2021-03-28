@@ -16,7 +16,7 @@ python-magic
 xmltodict
 yara-python==3.7.0
 appdirs
-lief==0.10.1
+lief==0.11.4
 requests
 pymongo
 pyyaml
