@@ -51,13 +51,24 @@
 - name: Flush handlers
   meta: flush_handlers
 
+- name: enable and start fact-db systemd service
+  service:
+    name: "fact-db"
+    enabled: "{{ fact_svc_enable | default(true) }}"
+    state: "{{ fact_svc_state | default('started') }}"
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
+- import_tasks: mongodb-users.yml
+
 - name: enable and start fact systemd service
   service:
     name: "fact-{{ item }}"
     enabled: "{{ fact_svc_enable | default(true) }}"
     state: "{{ fact_svc_state | default('started') }}"
   with_items:
-    - db
     - backend
     - frontend
   when: >

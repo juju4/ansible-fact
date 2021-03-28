@@ -16,38 +16,3 @@
     name: mongodb
     state: stopped
     enabled: no
-
-- name: Ensure fact-db service is started
-  service:
-    name: fact-db
-    state: started
-
-- name: Mongo | create admin user
-  mongodb_user:
-    login_host: localhost
-    login_port: 27018
-    database: fact_main
-    name: "{{ fact_main_config[0].v }}"
-    password: "{{ fact_main_config[1].v }}"
-    roles:
-      - role: 'dbOwner'
-        db: 'admin'
-      - role: 'readWriteAnyDatabase'
-        db: 'admin'
-      - role: 'root'
-        db: 'admin'
-    state: present
-
-- name: Mongo | create user
-  mongodb_user:
-    login_user: "{{ fact_main_config[0].v }}"
-    login_password: "{{ fact_main_config[1].v }}"
-    login_host: localhost
-    login_port: 27018
-    database: fact_main
-    name: "{{ fact_main_config[2].v }}"
-    password: "{{ fact_main_config[3].v }}"
-    roles:
-      - role: 'readAnyDatabase'
-        db: 'admin'
-    state: present
