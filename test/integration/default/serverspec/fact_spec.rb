@@ -67,6 +67,7 @@ end
 
 describe file("/var/log/fact/fact_mongo.log") do
   its(:size) { should > 0 }
+  its(:content) { should_not match /authentication failed/ }
   its(:content) { should_not match /ERROR/ }
   its(:content) { should_not match /WARNING/ }
 end
