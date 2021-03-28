@@ -142,7 +142,6 @@ jobs:
       - name: On failure
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
-          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ansible -i inventory --connection=local -m setup localhost' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager --failed' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -l /usr/bin/ | egrep "(python|pip|ansible)"' || true
@@ -158,6 +157,12 @@ jobs:
           sudo lxc storage list
           sudo zpool list
         if: ${{ failure() }}
+        continue-on-error: true
+      - name: After script - ansible setup
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ansible -i inventory --connection=local -m setup localhost' || true
+        if: ${{ always() }}
         continue-on-error: true
       - name: After script - systemd
         run: |
