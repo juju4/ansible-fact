@@ -27,21 +27,16 @@
     login_host: localhost
     login_port: 27018
     database: fact_main
-    name: "{{ item.n }}"
-    password: "{{ item.p }}"
-    roles: "{{ item.r }}"
+    name: "{{ fact_main_config[0].v }}"
+    password: "{{ fact_main_config[1].v }}"
+    roles:
+      - role: 'dbOwner'
+        db: 'admin'
+      - role: 'readWriteAnyDatabase'
+        db: 'admin'
+      - role: 'root'
+        db: 'admin'
     state: present
-  with_items:
-    - { n: "{{ fact_main_config[0].v }}",
-        p: "{{ fact_main_config[1].v }}",
-        r:
-          - role: 'dbOwner'
-            db: 'admin'
-          - role: 'readWriteAnyDatabase'
-            db: 'admin'
-          - role: 'root'
-            db: 'admin'
-    }
 
 - name: Mongo | create user
   mongodb_user:
@@ -50,14 +45,9 @@
     login_host: localhost
     login_port: 27018
     database: fact_main
-    name: "{{ item.n }}"
-    password: "{{ item.p }}"
-    roles: "{{ item.r }}"
+    name: "{{ fact_main_config[2].v }}"
+    password: "{{ fact_main_config[3].v }}"
+    roles:
+      - role: 'readAnyDatabase'
+        db: 'admin'
     state: present
-  with_items:
-    - { n: "{{ fact_main_config[2].v }}",
-        p: "{{ fact_main_config[3].v }}",
-        r:
-          - role: 'readAnyDatabase'
-            db: 'admin'
-    }
