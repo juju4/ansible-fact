@@ -64,3 +64,7 @@
     not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker")
         )
+
+- name: Give 5 seconds to ensure service correctly started
+  pause:
+    seconds: 5
