@@ -67,6 +67,11 @@ jobs:
         run: |
           sudo rm -Rf /usr/local/lib/android
           df -h
+      - name: Mongodb - Disable Transparent Huge Pages (THP)
+        run: |
+          cat /sys/kernel/mm/transparent_hugepage/enabled
+          echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+          cat /sys/kernel/mm/transparent_hugepage/enabled
       - name: Install lxd requirements
         run: |
           sudo apt-get update -qq
@@ -137,7 +142,6 @@ jobs:
       - name: On failure
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
-          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ansible -i inventory --connection=local -m setup localhost' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager --failed' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -l /usr/bin/ | egrep "(python|pip|ansible)"' || true
@@ -148,10 +152,17 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'host www.google.com' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ping -c 1 www.google.com' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ping -c 1 8.8.8.8' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ps aux' || true
           df -h
           sudo lxc storage list
           sudo zpool list
         if: ${{ failure() }}
+        continue-on-error: true
+      - name: After script - ansible setup
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ansible -i inventory --connection=local -m setup localhost' || true
+        if: ${{ always() }}
         continue-on-error: true
       - name: After script - systemd
         run: |
@@ -162,6 +173,8 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status mongodb' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status nginx' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status docker' || true
+        if: ${{ always() }}
+        continue-on-error: true
       - name: After script - files
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact

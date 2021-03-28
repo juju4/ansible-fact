@@ -6,11 +6,12 @@
   when: ansible_distribution == 'Ubuntu'
 - name: Include version-specific variables for RedHat
   include_vars: "RedHat-{{ ansible_distribution_major_version }}.yml"
-  when: ansible_os_family == "RedHat"
+  when: ansible_os_family == "RedHat" and ansible_distribution != 'Fedora'
 - name: Include for Fedora
   include_vars: "Fedora.yml"
   when: ansible_distribution == 'Fedora'
 
+- include_tasks: mongodb-thp.yml
 - include_tasks: fact.yml
 
 - import_tasks: firewall.yml

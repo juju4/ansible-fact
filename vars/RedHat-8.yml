@@ -17,7 +17,7 @@ fact_pkgs:
   - python3-ssdeep
   - unzip
   - clamav-daemon
-  - mongodb
+  - mongodb-org
 
 fact_binwalk_pkgs:
   - xorg-x11-server-Xvfb

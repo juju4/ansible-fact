@@ -11,13 +11,16 @@ fact_pkgs:
   - libtool
   - file-devel
   - libffi-devel
-  - libmagic-devel
-  - libfuzzy-devel
+  # - libmagic-devel
+  # - libfuzzy-devel
   - python3-tlsh
   - python3-ssdeep
   - unzip
-  - clamav-daemon
-  - mongodb
+  - clamav
+  - clamav-update
+  # Not in Fedora repo per license change, using rhel8 upstream
+  # - mongodb
+  - mongodb-org
 
 fact_binwalk_pkgs:
   - xorg-x11-server-Xvfb

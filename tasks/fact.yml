@@ -7,6 +7,9 @@
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
+- import_tasks: redhat-mongodb.yml
+  when: ansible_os_family == "RedHat"
+
 - name: Update latest packages
   package:  # noqa package-latest
     name: '*'
@@ -112,6 +115,13 @@
     - { re: '^        listen   443;', rep: '        listen   443 ssl;' }
     - { re: '^        ssl on;', rep: '        # ssl on;' }
   when: fact_nginx_shim
+
+- name: Nginx | Ensure logs in target directory
+  replace:
+    dest: "{{ fact_root }}/src/config/nginx.conf"
+    regexp: "access_log .* compression;"
+    replace: "access_log {{ fact_logdir }}/fact_web.log compression;"
+    mode: '0644'
 
 - import_tasks: plugins-binwalk.yml
 - import_tasks: plugins-linter.yml
