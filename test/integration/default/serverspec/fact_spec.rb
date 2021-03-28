@@ -33,6 +33,21 @@ describe process('uwsgi') do
   its(:user) { should eq "_fact" }
 end
 
+describe service('fact-db') do
+  it { should be_enabled }
+  it { should be_running }
+end
+
+describe service('fact-backend') do
+  it { should be_enabled }
+  it { should be_running }
+end
+
+describe service('fact-frontend') do
+  it { should be_enabled }
+  it { should be_running }
+end
+
 describe port(5000) do
   it { should be_listening }
 end
