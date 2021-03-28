@@ -26,6 +26,14 @@ fact_pkgs:
 fact_binwalk_pkgs:
   - xorg-x11-server-Xvfb
 
+fact_linter_pkgs:
+  - shellcheck
+  - luarocks
+  - lua
+  - lua-devel
+  - nodejs
+  - npm
+
 fact_oms_pkgs:
   - clamav
   - clamav-update
