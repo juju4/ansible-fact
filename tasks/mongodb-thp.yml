@@ -7,7 +7,7 @@
     name: sysfsutils
     state: present
 
-- name:  Set transparent_hugepage
+- name: Set transparent_hugepage
   lineinfile:
     dest: /etc/sysfs.conf
     regexp: '^kernel/mm/transparent_hugepage/enabled = .*'
