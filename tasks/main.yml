@@ -11,4 +11,5 @@
   include_vars: "Fedora.yml"
   when: ansible_distribution == 'Fedora'
 
+- include_tasks: mongodb-thp.yml
 - include_tasks: fact.yml
