@@ -10,3 +10,21 @@
     - { p: /tmp, m: '1777', o: root }
     - { p: /media/data/fact_wt_mongodb, m: '0744', o: "{{ fact_user }}" }
     - { p: /media/data/fact_auth_data, m: '0744', o: "{{ fact_user }}" }
+
+- name: Ensure package mongodb service is stopped and disabled (included in fact-db)
+  service:
+    name: mongodb
+    state: stopped
+    enabled: no
+
+- name: Mongo | create users
+  mongodb_user:
+    login_user: root
+    login_password: root_password
+    database: fact_main
+    name: "{{ item.n }}"
+    password: "{{ item.p }}"
+    state: present
+  with_items:
+    - { n: "{{ fact_main_config[0].v }}", p: "{{ fact_main_config[1].v }}" }
+    - { n: "{{ fact_main_config[2].v }}", p: "{{ fact_main_config[3].v }}" }

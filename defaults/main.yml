@@ -29,6 +29,7 @@ fact_ipaddressallow: '10.0.0.0/8 192.168.1.0/24 localhost'
 fact_syslog_target: /var/log/fact.log
 
 # mostly from default src/main.cfg
+# ensure to keep entries order for mongodb create users
 fact_main_config:
   - {s: data_storage, o: db_admin_user, v: fact_admin}
   - {s: data_storage, o: db_admin_pw, v: 6fJEb5LkV2hRtWq0}
