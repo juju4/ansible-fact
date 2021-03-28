@@ -12,3 +12,5 @@
     dest: /etc/sysfs.conf
     regexp: '^kernel/mm/transparent_hugepage/enabled = .*'
     line: 'kernel/mm/transparent_hugepage/enabled = never'
+    mode: '0644'
+    create: yes
