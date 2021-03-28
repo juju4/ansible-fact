@@ -67,6 +67,11 @@ jobs:
         run: |
           sudo rm -Rf /usr/local/lib/android
           df -h
+      - name: Mongodb - Disable Transparent Huge Pages (THP)
+        run: |
+          cat /sys/kernel/mm/transparent_hugepage/enabled
+          echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+          cat /sys/kernel/mm/transparent_hugepage/enabled
       - name: Install lxd requirements
         run: |
           sudo apt-get update -qq
