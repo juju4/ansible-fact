@@ -153,6 +153,7 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ping -c 1 www.google.com' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ping -c 1 8.8.8.8' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ps auxw' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -v https://luarocks.org/' || true
           df -h
           sudo lxc storage list
           sudo zpool list
