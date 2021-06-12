@@ -4,6 +4,8 @@
 - name: Verify
   hosts: facthosts
   gather_facts: false
+  vars:
+    fact_url: https://localhost
   tasks:
     - name: Check if needed pip packages are installed
       command: "pip freeze"
@@ -63,7 +65,7 @@
 
     - name: Fetch localhost:9191 endpoint
       uri:
-        url: https://localhost:9191
+        url: "{{ fact_url }}:9191"
         validate_certs: no
         return_content: yes
       register: web1
@@ -78,7 +80,7 @@
 
     - name: Fetch localhost endpoint
       uri:
-        url: https://localhost
+        url: "{{ fact_url }}"
         validate_certs: no
         return_content: yes
       register: web2
@@ -91,7 +93,7 @@
 
     - name: Fetch localhost:5000 endpoint
       uri:
-        url: https://localhost:5000
+        url: "{{ fact_url }}:5000"
         validate_certs: no
         return_content: yes
       register: web3
@@ -106,7 +108,7 @@
 
     - name: Fetch localhost:5000/system_health endpoint
       uri:
-        url: https://localhost:5000/system_health
+        url: "{{ fact_url }}:5000/system_health"
         validate_certs: no
         return_content: yes
       register: web4
@@ -121,16 +123,100 @@
 
     - name: Fetch localhost/system_health endpoint
       uri:
-        url: https://localhost/system_health
+        url: "{{ fact_url }}/system_health"
         validate_certs: no
         return_content: yes
       register: web4b
-    - name: Validate localhost:5000/system_health endpoint
+    - name: Validate localhost/system_health endpoint
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
     - name: Debug | web4b
       debug: var=web4b
+
+    - name: Query firmware in database
+      uri:
+        url: "{{ fact_url }}/rest/firmware"
+        validate_certs: no
+        return_content: yes
+      register: rest1
+      failed_when: false
+    - name: Validate rest1
+      assert:
+        that: >
+          "'request' in rest1.content and 'request_resource' in rest1.content"
+    - name: Debug | rest1
+      debug: var=rest1 verbosity=1
+
+    # https://github.com/fkie-cad/FACT_core/wiki/Rest-API
+    - name: Submit test firmware
+      uri:
+        url: "{{ fact_url }}/rest/firmware"
+        method: PUT
+        body: >
+          {"vendor": "AVM", "device_class": "Router", "device_part": "Unknown", "file_name": "rest_test.txt", "version": "0.1", "requested_analysis_systems": ["file_type", "file_hashes"], "binary": "dGVzdDEyMzQgdGhpcyBpcyBzb21lIHRlc3QgZmlsZQ==", "device_name": "rest_test", "firmware_version": "1", "release_date": "2011-01-01", "tags": "tag1,tag2"}
+        headers:
+          Content-Type: application/json
+        validate_certs: no
+        return_content: yes
+      register: rest2
+      failed_when: false
+    - name: Validate rest2
+      assert:
+        that: >
+          "'request' in rest2.content and 'request_resource' in rest2.content"
+    - name: Debug | rest2
+      debug: var=rest2 verbosity=1
+
+    - name: Download Damn Vulnerable Router Firmware
+      get_url:
+        url: https://github.com/praetorian-inc/DVRF/blob/master/Firmware/DVRF_v03.bin?raw=true
+        dest: /tmp/DVRF_v03.bin
+        mode: '0600'
+        checksum: 'sha256:1a3442c85f589f85b922a2b7b22c46d2e3844a3f729cc4ed432138c0f7abc046'
+    - name: Set Damn Vulnerable Router Firmware REST json input
+      copy:
+        src: firmware-submit.json
+        dest: /tmp/firmware-submit.json
+        mode: '0600'
+    - name: Convert bin to base64
+      shell: >
+        (echo -n '"binary": "'; base64 -w 0 /tmp/DVRF_v03.bin; echo '"') > /tmp/DVRF_v03.bin.base64
+      args:
+        creates: /tmp/DVRF_v03.bin.base64
+    # jq --argjson base64_data "$(</tmp/DVRF_v03.bin.base64)" '.[].binary = $base64_data' /tmp/firmware-submit.json
+    #     => FIXME! /usr/bin/jq: Argument list too long
+    # jq '.binary = base64' /tmp/firmware-submit.json --slurpfile base64 /tmp/DVRF_v03.bin.base64 > /tmp/firmware-submit2.json
+    #     => jq: Bad JSON in --slurpfile base64 /tmp/DVRF_v03.bin.base64: Invalid numeric literal at EOF at line 1, column 10339672
+    - name: Insert base64 in json  # noqa command-instead-of-module
+      shell: sed '/}/e cat /tmp/DVRF_v03.bin.base64' /tmp/firmware-submit.json > /tmp/firmware-submit2.json
+      args:
+        creates: /tmp/firmware-submit2.json
+    - name: Submit test firmware from FACT server  # noqa command-instead-of-module no-changed-when
+      command: >
+        curl -k {{ fact_url }}/rest/firmware -X PUT -H "Content-Type: application/json" -d @/tmp/firmware-submit2.json
+      register: rest2b
+      failed_when: false
+    - name: Validate rest2b
+      assert:
+        that: >
+          "'request' in rest2b.content and 'request_resource' in rest2b.content"
+    - name: Debug | rest2b
+      debug: var=rest2b verbosity=1
+
+    - name: Query FACT status
+      uri:
+        url: "{{ fact_url }}/rest/status"
+        validate_certs: no
+        return_content: yes
+      register: rest3
+      failed_when: false
+    - name: Validate rest3
+      assert:
+        that: >
+          "'system_status' in rest3.content and 'request_resource' in rest3.content"
+    - name: Debug | rest3
+      debug: var=rest3 verbosity=1
 
     - name: Fetch content of /var/log/fact/fact_main.log
       slurp:
@@ -163,7 +249,3 @@
       assert:
         that: >
           tmp.stat.exists and tmp.stat.isdir and tmp.stat.mode == '1777'
-
-# test?
-# way to submit file from cli? or makes any validation operational?
-# ex: https://github.com/praetorian-inc/DVRF/blob/master/Firmware/DVRF_v03.bin

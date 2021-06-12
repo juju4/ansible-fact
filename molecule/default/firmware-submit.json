@@ -1,0 +1,11 @@
+{
+  "device_name": "Damn Vulnerable Router Firmware",
+  "device_class": "Router",
+  "device_part": "Unknown",
+  "file_name": "DVRF_v03.bin",
+  "version": "v0.3",
+  "vendor": "praetorian-inc",
+  "release_date": "2016/05/18",
+  "tags": "test_api",
+  "requested_analysis_systems": ["file_type", "file_hashes", "cpu_architecture"],
+}
