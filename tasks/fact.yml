@@ -38,6 +38,13 @@
     create: yes
     backup: "{{ fact_backup | default(false) }}"
 
+- name: Ensure right permissions for ansible remote_tmp
+  file:
+    path: "{{ fact_home }}/.ansible/tmp"
+    state: directory
+    mode: '0700'
+    owner: "{{ fact_user }}"
+
 - name: clone FACT repository
   git:
     repo: https://github.com/fkie-cad/FACT_core.git
