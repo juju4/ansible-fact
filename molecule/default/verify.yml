@@ -181,7 +181,7 @@
         mode: '0600'
     - name: Convert bin to base64
       shell: >
-        (echo -n '"binary": "'; base64 -w 0 /tmp/DVRF_v03.bin; echo '"') > /tmp/DVRF_v03.bin.base64
+        (echo -n ', "binary": "'; base64 -w 0 /tmp/DVRF_v03.bin; echo '"') > /tmp/DVRF_v03.bin.base64
       args:
         creates: /tmp/DVRF_v03.bin.base64
     # jq --argjson base64_data "$(</tmp/DVRF_v03.bin.base64)" '.[].binary = $base64_data' /tmp/firmware-submit.json
