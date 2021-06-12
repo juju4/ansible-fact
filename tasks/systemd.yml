@@ -60,11 +60,12 @@
     - db
     - backend
     - frontend
+  notify:
+    - pause
   when: >
     not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker")
         )
 
-- name: Give 5 seconds to ensure service correctly started
-  pause:
-    seconds: 5
+- name: Flush handlers
+  meta: flush_handlers

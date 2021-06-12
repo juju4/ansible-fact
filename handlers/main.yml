@@ -47,3 +47,7 @@
   command: python3 update_password_list.py
   args:
     chdir: "{{ fact_root }}/src/plugins/analysis/users_and_passwords/internal"
+
+- name: pause
+  pause:
+    seconds: 5
