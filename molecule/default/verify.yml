@@ -36,16 +36,16 @@
       command: pgrep -u _fact python3
       register: ps
       changed_when: false
-      ignore_errors: true
+      failed_when: false
     - name: Validate ps output
       assert:
         that: ps.stdout
-      ignore_errors: true
+      failed_when: false
     - name: Ensure uwsgi process is running
       command: pgrep -u _fact uwsgi
       register: ps2
       changed_when: false
-      ignore_errors: true
+      failed_when: false
     - name: Validate ps output
       assert:
         that: ps2.stdout
@@ -67,7 +67,7 @@
         validate_certs: no
         return_content: yes
       register: web1
-      ignore_errors: true
+      failed_when: false
     - name: Validate localhost:9191 endpoint
       assert:
         that: >
@@ -95,7 +95,7 @@
         validate_certs: no
         return_content: yes
       register: web3
-      ignore_errors: true
+      failed_when: false
     - name: Validate localhost:5000 endpoint
       assert:
         that: >
@@ -110,7 +110,7 @@
         validate_certs: no
         return_content: yes
       register: web4
-      ignore_errors: true
+      failed_when: false
     - name: Validate localhost:5000/system_health endpoint
       assert:
         that: >
