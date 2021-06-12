@@ -18,6 +18,8 @@ fact_pkgs:
   - unzip
   - clamav-daemon
   - mongodb
+  # docker warning: auplink flush failed
+  - aufs-tools
 
 fact_binwalk_pkgs:
   - xvfb
