@@ -66,7 +66,7 @@
 
     - name: Fetch localhost:9191 endpoint
       uri:
-        url: "{{ fact_url }}:9191"
+        url: "http://localhost:9191"
         validate_certs: no
         return_content: yes
       register: web1
@@ -75,7 +75,6 @@
       assert:
         that: >
           "'sockets' in web1.content and 'workers' in web1.content"
-      when: False
     - name: Debug | web1
       debug: var=web1
 
@@ -85,7 +84,7 @@
         validate_certs: no
         return_content: yes
       register: web2
-    - name: Validate localhost:9191 endpoint
+    - name: Validate localhost endpoint
       assert:
         that: >
           "'<title>FACT</title>' in web2.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web2.content"
@@ -94,7 +93,7 @@
 
     - name: Fetch localhost:5000 endpoint
       uri:
-        url: "{{ fact_url }}:5000"
+        url: "http://localhost:5000"
         validate_certs: no
         return_content: yes
       register: web3
@@ -103,13 +102,12 @@
       assert:
         that: >
           "'<title>FACT</title>' in web3.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web3.content"
-      when: false
     - name: Debug | web3
       debug: var=web3
 
     - name: Fetch localhost:5000/system_health endpoint
       uri:
-        url: "{{ fact_url }}:5000/system_health"
+        url: "http://localhost:5000/system_health"
         validate_certs: no
         return_content: yes
       register: web4
@@ -118,7 +116,6 @@
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4.content and '<h5 class=\"card-title\">backend status</h5>' in web4.content"
-      when: false
     - name: Debug | web4
       debug: var=web4
 
@@ -196,6 +193,8 @@
     - name: Submit test firmware from FACT server  # noqa command-instead-of-module no-changed-when
       command: >
         curl -k {{ fact_url }}/rest/firmware -X PUT -H "Content-Type: application/json" -d @/tmp/firmware-submit2.json
+      args:
+        warn: false
       register: rest2b
       failed_when: false
     - name: Validate rest2b
