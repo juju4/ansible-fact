@@ -6,6 +6,7 @@
   gather_facts: false
   vars:
     fact_url: https://localhost
+    pytest_enable: false
   tasks:
     - name: Check if needed pip packages are installed
       command: "pip freeze"
@@ -249,3 +250,17 @@
       assert:
         that: >
           tmp.stat.exists and tmp.stat.isdir and tmp.stat.mode == '1777'
+
+    - name: Pytest - ~15min
+      shell: |
+        set -o pipefail
+        pytest 2>&1 | tee /tmp/pytest.out
+      args:
+        executable: /bin/bash
+        chdir: /var/_fact/FACT_core
+        creates: /tmp/pytest.out
+      become: yes
+      become_user: _fact
+      register: pytestout
+      failed_when: false
+      when: pytest_enable
