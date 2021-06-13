@@ -181,8 +181,20 @@ jobs:
           cd $GITHUB_WORKSPACE/juju4.fact
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lR /var/_fact/FACT_core/'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lR /var/_fact/FACT_core/src/config'
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - config
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/_fact/FACT_core/src/config/main.cfg'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/_fact/FACT_core/src/config/mongod.conf'
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - logs
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main.log'
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_mongo.log'
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - nginx
