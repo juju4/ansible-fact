@@ -49,7 +49,7 @@
   git:
     repo: https://github.com/fkie-cad/FACT_core.git
     dest: "{{ fact_root }}"
-    version: "{{ fact_version | default('v3.1.3') }}"
+    version: "{{ fact_version }}"
     update: no
     force: no
   become: yes

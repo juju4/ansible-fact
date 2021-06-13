@@ -1,6 +1,7 @@
 ---
 # defaults file for juju4.fact
 
+fact_version: 3.2
 fact_user: _fact
 fact_home: /var/_fact
 fact_root: /var/_fact/FACT_core
