@@ -57,6 +57,7 @@ jobs:
           { echo '[defaults]'; echo 'callback_whitelist = profile_tasks, timer'; echo 'roles_path = ../'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
           { echo '[facthosts]'; echo 'localhost'; } >> inventory
           cat inventory
+          sed -ri 's/hosts: facthosts/hosts: all/' molecule/default/verify.yml
       - name: Environment
         run: |
           pwd
@@ -155,6 +156,7 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ps auxw' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -v https://luarocks.org/' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /tmp/kitchen/' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /tmp/kitchen/hosts' || true
           df -h
           sudo lxc storage list
           sudo zpool list
