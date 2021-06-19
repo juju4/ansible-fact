@@ -13,3 +13,5 @@
 
 - include_tasks: mongodb-thp.yml
 - include_tasks: fact.yml
+
+- include_tasks: backup-restore.yml

@@ -1,0 +1,32 @@
+#!/bin/sh
+{{ ansible_managed | comment }}
+
+## restore script for fact
+## FIXME/TODO
+
+export PATH=/usr/sbin:/usr/bin:/sbin:/bin
+umask 022
+
+if [ $# -gt 1 -a -r "$1" ]; then
+    backupfile=$1
+else
+    backupfile={{ backupdir }}/backup-fact.tar.gz
+fi
+
+tmpdir=`mktemp -d /tmp/restore.XXXXXX || exit 1`
+
+tar xzf $backupfile -C $tmpdir
+
+# Before restoring, ensure services are stop
+systemctl stop fact-frontend
+systemctl stop fact-backend
+systemctl stop fact-db
+
+# TODO
+# mongorestore
+
+rsync -rvl $tmpdir/{{ fact_datadir }}/* {{ fact_datadir }}/
+
+systemctl start fact-db
+systemctl start fact-backend
+systemctl start fact-frontend

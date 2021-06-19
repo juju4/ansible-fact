@@ -41,3 +41,6 @@ fact_main_config:
   - {s: data_storage, o: logLevel, v: WARNING}
 
 fact_nginx_shim: false
+
+scriptsdir: /usr/local/scripts
+backupdir: /var/_backup
