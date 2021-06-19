@@ -125,12 +125,14 @@
         validate_certs: no
         return_content: yes
       register: web4b
+      failed_when: false
     - name: Validate localhost/system_health endpoint
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
     - name: Debug | web4b
       debug: var=web4b
+      failed_when: false
 
     - name: Query firmware in database
       uri:
