@@ -16,3 +16,6 @@
       when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 18)
   roles:
     - juju4.fact
+
+- name: Verify playbook
+  import_playbook: ../../../molecule/default/verify.yml
