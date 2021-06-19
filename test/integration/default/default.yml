@@ -18,4 +18,6 @@
     - juju4.fact
 
 - name: Verify playbook
-  import_playbook: ../../../molecule/default/verify.yml
+  # import_playbook: verify.yml
+  # in kitchen
+  import_playbook: /tmp/kitchen/juju4.fact/molecule/default/verify.yml
