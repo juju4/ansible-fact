@@ -48,10 +48,12 @@ describe service('fact-frontend') do
   it { should be_running }
 end
 
+# uwsgi
 describe port(5000) do
   it { should be_listening }
 end
 
+# uwsgi stats
 describe port(9191) do
   it { should be_listening }
 end
