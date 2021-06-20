@@ -1,0 +1,25 @@
+---
+
+- hosts: all
+  vars:
+    fact_version: HEAD
+  pre_tasks:
+    - name: Install python3
+      raw: test -e /usr/bin/python3 || (apt -y update && apt install -y python3-minimal)
+      register: python3
+      changed_when: "'installed' in python3.stdout"
+      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 18)
+    - name: Gather Facts
+      setup:
+      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 18)
+    - name: Ubuntu Bionic | Enforce python3 for ansible
+      set_fact:
+        ansible_python_interpreter: /usr/bin/python3
+      when: (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int == 18)
+  roles:
+    - juju4.fact
+
+- name: Verify playbook
+  # import_playbook: verify.yml
+  # in kitchen
+  import_playbook: /tmp/kitchen/juju4.fact/molecule/default/verify.yml
