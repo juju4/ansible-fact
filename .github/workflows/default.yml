@@ -34,7 +34,7 @@ jobs:
             experimental: true
     env:
       ANSIBLE_CALLBACK_WHITELIST: profile_tasks
-      ANSIBLE_EXTRA_VARS: "-e fact_nginx_shim=true"
+      ANSIBLE_EXTRA_FLAGS: "-e fact_nginx_shim=true"
 
     steps:
       - uses: actions/checkout@v2
