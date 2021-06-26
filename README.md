@@ -53,6 +53,10 @@ $ KITCHEN_YAML=".kitchen.vagrant.yml" kitchen verify
 
 ## Troubleshooting & Known issues
 
+* CI has some known limitations has fact uses docker heavily and some restrictions apply inside github, kitchen and lxd.
+* pdf creation not working
+* some plugins are not working
+
 ## License
 
 BSD 2-clause
