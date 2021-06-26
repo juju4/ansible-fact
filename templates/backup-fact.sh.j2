@@ -6,21 +6,21 @@
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 umask 022
 
-date=`date +%Y-%m-%d`
+date=$(date +%Y-%m-%d)
 dest={{ backupdir }}
-[ ! -d "$dest" ] && install -d -m 0700 -o root "$dest"
-destfile=$dest/backup-fact-$date.tar.gz
+[ ! -d "${dest}" ] && install -d -m 0700 -o root "${dest}"
+destfile=${dest}/backup-fact-$date.tar.gz
 
 # mongodb
 #$ mongo --eval "db.adminCommand( { listDatabases: 1 } )"
-mongodump --db admin -o $dest/mongodump
-mongodump --db config -o $dest/mongodump
-mongodump --db local -o $dest/mongodump
+mongodump --db admin -o "${dest}/mongodump"
+mongodump --db config -o "${dest}/mongodump"
+mongodump --db local -o "${dest}/mongodump"
 # or
 # mongoexport -d local -c startup_log
 
 # one archive with mongodump and other directories
-tar czf $destfile $dest/mongodump {{ fact_datadir }} {{ fact_root }}/src/config {{ fact_logdir }}
+tar czf "${destfile}" "${dest}/mongodump" {{ fact_datadir }} {{ fact_root }}/src/config {{ fact_logdir }}
 
-tar tzf $destfile > /dev/null
-openssl dgst -sha512 $destfile > $destfile.distinfo
+tar tzf "${destfile}" > /dev/null
+openssl dgst -sha512 "${destfile}" > "${destfile}.distinfo"

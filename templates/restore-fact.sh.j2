@@ -13,9 +13,9 @@ else
     backupfile={{ backupdir }}/backup-fact.tar.gz
 fi
 
-tmpdir=`mktemp -d /tmp/restore.XXXXXX || exit 1`
+tmpdir=$(mktemp -d /tmp/restore.XXXXXX || exit 1)
 
-tar xzf $backupfile -C $tmpdir
+tar xzf "$backupfile" -C "$tmpdir"
 
 # Before restoring, ensure services are stop
 systemctl stop fact-frontend
