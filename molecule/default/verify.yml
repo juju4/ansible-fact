@@ -167,6 +167,7 @@
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
+      failed_when: false
     - name: Debug | web4b
       debug: var=web4b
       failed_when: false
@@ -182,6 +183,7 @@
       assert:
         that: >
           "'request' in rest1.content and 'request_resource' in rest1.content"
+      failed_when: false
     - name: Debug | rest1
       debug: var=rest1 verbosity=1
 
@@ -202,6 +204,7 @@
       assert:
         that: >
           "'request' in rest2.content and 'request_resource' in rest2.content"
+      failed_when: false
     - name: Debug | rest2
       debug: var=rest2 verbosity=1
 
@@ -240,6 +243,7 @@
       assert:
         that: >
           "'request' in rest2b.content and 'request_resource' in rest2b.content"
+      failed_when: false
     - name: Debug | rest2b
       debug: var=rest2b verbosity=1
 
@@ -254,6 +258,7 @@
       assert:
         that: >
           "'system_status' in rest3.content and 'request_resource' in rest3.content"
+      failed_when: false
     - name: Debug | rest3
       debug: var=rest3 verbosity=1
 
