@@ -86,11 +86,15 @@
     source: pull
   with_items: "{{ fact_docker_images }}"
 
+- name: Check if freshclam completed main.cvd download
+  stat:
+    path: /var/lib/clamav/main.cvd
+  register: cvd
 - name: Ensure dependencies services are started
   service:
     name: clamav-daemon
     state: started
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and cvd.stat.exists
 
 # review src/config/main.cfg, src/config/mongod.conf
 - name: Update config
