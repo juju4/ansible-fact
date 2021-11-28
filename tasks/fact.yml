@@ -125,6 +125,18 @@
     replace: "access_log {{ fact_logdir }}/fact_web.log compression;"
     mode: '0644'
 
+- block:
+    - name: RedHat | Ensure nginx.conf accessible to nginx user
+      acl:
+        path: "{{ item.path }}"
+        entity: nginx
+        etype: user
+        permissions: "{{ item.perm }}"
+        state: present
+      loop:
+        - { path: /var/_fact, perm: r-x }
+  when: ansible_os_family == "RedHat"
+
 - name: Check if marker exists
   stat: path="{{ fact_root }}/.before_install_py"
   register: mark
