@@ -7,6 +7,7 @@ fact_pkgs:
   - python3
   - python3-pip
   - python3-devel
+  - python3-urllib3
   - automake
   - autoconf
   - cmake
