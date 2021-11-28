@@ -7,6 +7,25 @@
   vars:
     fact_url: https://localhost
     pytest_enable: false
+    fact_ports_verify:
+      - { h: localhost, p: 443 }
+      # mongodb custom
+      - { h: localhost, p: 27018 }
+  pre_tasks:
+    - name: Not container | Set fact
+      set_fact:
+        fact_ports_verify:
+          - { h: localhost, p: 443 }
+          # mongodb custom
+          - { h: localhost, p: 27018 }
+          # fact uwsgi
+          - { h: localhost, p: 5000 }
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
   tasks:
     - name: Check if needed pip packages are installed
       command: "pip freeze"
@@ -55,19 +74,16 @@
         that: ps2.stdout
       when: >
         not (ansible_virtualization_type is defined and
-              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd")
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
             )
     - name: Ensure ports are listening
       wait_for:
         host: "{{ item.h }}"
         port: "{{ item.p }}"
         timeout: 10
-      with_items:
-        - { h: localhost, p: 443 }
-        # fact uwsgi
-        # - { h: localhost, p: 5000 }
-        # mongodb custom
-        - { h: localhost, p: 27018 }
+      with_items: "{{ fact_ports_verify }}"
 
     - name: Fetch localhost:9191 endpoint
       uri:
@@ -107,7 +123,11 @@
       assert:
         that: >
           "'<title>FACT</title>' in web3.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web3.content"
-      when: false
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
     - name: Debug | web3
       debug: var=web3
 
@@ -122,7 +142,11 @@
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4.content and '<h5 class=\"card-title\">backend status</h5>' in web4.content"
-      when: false
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
     - name: Debug | web4
       debug: var=web4
 
