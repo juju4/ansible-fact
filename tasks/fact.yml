@@ -47,7 +47,7 @@
 
 - name: clone FACT repository
   git:
-    repo: https://github.com/fkie-cad/FACT_core.git
+    repo: "{{ fact_repo }}"
     dest: "{{ fact_root }}"
     version: "{{ fact_version }}"
     update: no
@@ -134,6 +134,13 @@
     state: touch
     mode: '0600'
   when: not mark.stat.exists
+
+- name: Update lief to latest 0.11.5
+  replace:
+    dest: "{{ fact_root }}/src/install/common.py"
+    regexp: lief==0.10.1
+    replace: lief==0.11.5
+    mode: '0644'
 
 - name: FACT install - python way
   shell: |
