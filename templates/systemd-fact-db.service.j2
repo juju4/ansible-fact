@@ -5,7 +5,7 @@ Requires=network.target
 
 [Service]
 Type=simple
-ExecStart={{ fact_root }}/src/start_fact_db.py
+ExecStart=/usr/bin/python3 {{ fact_root }}/src/start_fact_db.py
 WorkingDirectory={{ fact_root }}
 Restart=on-failure
 RestartSec=30
