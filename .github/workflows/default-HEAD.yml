@@ -233,3 +233,11 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv http://localhost:27018'
         if: ${{ always() }}
         continue-on-error: true
+      - name: After script - clamav
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /var/lib/clamav/'
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/clamav/freshclam.log'
+        if: ${{ always() }}
+        continue-on-error: true
