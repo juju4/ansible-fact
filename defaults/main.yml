@@ -45,3 +45,4 @@ fact_nginx_shim: false
 
 scriptsdir: /usr/local/scripts
 backupdir: /var/_backup
+fact_restore_archive: ''

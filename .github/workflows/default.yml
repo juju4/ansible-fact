@@ -183,6 +183,12 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status docker' || true
         if: ${{ always() }}
         continue-on-error: true
+      - name: After script - journalctl
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'journalctl -xe --no-pager' || true
+        if: ${{ always() }}
+        continue-on-error: true
       - name: After script - files
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
@@ -201,6 +207,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
           set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /var/log/fact/'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main.log'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main_frontend.log'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main_backend.log'
@@ -217,5 +224,14 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /etc/nginx/nginx.conf'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'nginx -V'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'nginx -t'
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - curl
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv https://localhost'
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv http://localhost:5000'
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv http://localhost:27018'
         if: ${{ always() }}
         continue-on-error: true

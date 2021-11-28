@@ -15,3 +15,5 @@
 - include_tasks: fact.yml
 
 - include_tasks: backup-restore.yml
+- include_tasks: fact-restore.yml
+  when: fact_restore_archive|string
