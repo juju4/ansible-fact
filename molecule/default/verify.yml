@@ -130,6 +130,7 @@
               (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
                ansible_virtualization_type == "lxc"
               )
+            )
     - name: Debug | web3
       debug: var=web3
 
