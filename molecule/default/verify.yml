@@ -109,6 +109,12 @@
       assert:
         that: >
           "'<title>FACT</title>' in web2.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web2.content"
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
     - name: Debug | web2
       debug: var=web2
 
