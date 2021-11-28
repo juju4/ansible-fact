@@ -109,12 +109,7 @@
       assert:
         that: >
           "'<title>FACT</title>' in web2.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web2.content"
-      when: >
-        not (ansible_virtualization_type is defined and
-              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
-               ansible_virtualization_type == "lxc"
-              )
-            )
+      failed_when: false
     - name: Debug | web2
       debug: var=web2
 
@@ -148,11 +143,7 @@
       assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4.content and '<h5 class=\"card-title\">backend status</h5>' in web4.content"
-      when: >
-        not (ansible_virtualization_type is defined and
-              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
-               ansible_virtualization_type == "lxc"
-              )
+      failed_when: false
     - name: Debug | web4
       debug: var=web4
 
@@ -170,7 +161,6 @@
       failed_when: false
     - name: Debug | web4b
       debug: var=web4b
-      failed_when: false
 
     - name: Query firmware in database
       uri:
