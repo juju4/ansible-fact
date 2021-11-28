@@ -105,6 +105,7 @@
         validate_certs: no
         return_content: yes
       register: web2
+      failed_when: false
     - name: Validate localhost endpoint
       assert:
         that: >
