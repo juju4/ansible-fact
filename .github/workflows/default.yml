@@ -183,6 +183,12 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'systemctl -l --no-pager status docker' || true
         if: ${{ always() }}
         continue-on-error: true
+      - name: After script - journalctl
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'journalctl -xe --no-pager' || true
+        if: ${{ always() }}
+        continue-on-error: true
       - name: After script - files
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
