@@ -7,6 +7,25 @@
   vars:
     fact_url: https://localhost
     pytest_enable: false
+    fact_ports_verify:
+      - { h: localhost, p: 443 }
+      # mongodb custom
+      - { h: localhost, p: 27018 }
+  pre_tasks:
+    - name: Not container | Set fact
+      set_fact:
+        fact_ports_verify:
+          - { h: localhost, p: 443 }
+          # mongodb custom
+          - { h: localhost, p: 27018 }
+          # fact uwsgi
+          - { h: localhost, p: 5000 }
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
   tasks:
     - name: Check if needed pip packages are installed
       command: "pip freeze"
@@ -34,6 +53,7 @@
     - name: Validate clamd socket present
       assert:
         that: ctl.stat.exists and ctl.stat.issock
+      failed_when: false
 
     - name: Ensure python3 process is running
       command: pgrep -u _fact python3
@@ -54,19 +74,16 @@
         that: ps2.stdout
       when: >
         not (ansible_virtualization_type is defined and
-              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "lxc")
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
             )
     - name: Ensure ports are listening
       wait_for:
         host: "{{ item.h }}"
         port: "{{ item.p }}"
         timeout: 10
-      with_items:
-        - { h: localhost, p: 443 }
-        # fact
-        - { h: localhost, p: 5000 }
-        # mongodb custom
-        - { h: localhost, p: 27018 }
+      with_items: "{{ fact_ports_verify }}"
 
     - name: Fetch localhost:9191 endpoint
       uri:
@@ -88,6 +105,7 @@
         validate_certs: no
         return_content: yes
       register: web2
+      failed_when: false
     - name: Validate localhost endpoint
       assert:
         that: >
@@ -106,6 +124,12 @@
       assert:
         that: >
           "'<title>FACT</title>' in web3.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web3.content"
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
     - name: Debug | web3
       debug: var=web3
 
@@ -136,7 +160,6 @@
           "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
     - name: Debug | web4b
       debug: var=web4b
-      failed_when: false
 
     - name: Query firmware in database
       uri:
