@@ -24,6 +24,7 @@ fact_pkgs:
   # Not in Fedora repo per license change, using rhel8 upstream
   # - mongodb
   - mongodb-org
+  - nginx
 
 fact_binwalk_pkgs:
   - xorg-x11-server-Xvfb
