@@ -2,31 +2,40 @@
 {{ ansible_managed | comment }}
 
 ## restore script for fact
-## FIXME/TODO
 
 export PATH=/usr/sbin:/usr/bin:/sbin:/bin
 umask 022
+systemd_args="--no-ask-password --no-pager"
 
-if [ $# -gt 1 -a -r "$1" ]; then
+backupfile="{{ backupdir }}/backup-fact.tar.gz"
+if [ "X$#" = "X1" ] && [ -r "$1" ]; then
     backupfile=$1
-else
-    backupfile={{ backupdir }}/backup-fact.tar.gz
+elif [ ! -r "${backupfile}" ]; then
+    echo "FATAL! No readable input backup file."
+    exit 1
 fi
 
 tmpdir=$(mktemp -d /tmp/restore.XXXXXX || exit 1)
 
-tar xzf "$backupfile" -C "$tmpdir"
+tar xzf "${backupfile}" -C "${tmpdir}"
 
 # Before restoring, ensure services are stop
-systemctl stop fact-frontend
-systemctl stop fact-backend
-systemctl stop fact-db
+echo "Stopping fact services..."
+systemctl stop fact-frontend $systemd_args
+systemctl stop fact-backend $systemd_args
+systemctl stop fact-db $systemd_args
 
-# TODO
-# mongorestore
+echo "Restoring fact mongodb data..."
+mongorestore --quiet --drop --db=admin "${tmpdir}{{ backupdir }}/mongodump/admin/"*.bson
+mongorestore --quiet --drop --db=local "${tmpdir}{{ backupdir }}/mongodump/local/"*.bson
+chown -R {{ fact_user }} {{ fact_datadir }}/fact_wt_mongodb
 
-rsync -rvl $tmpdir/{{ fact_datadir }}/* {{ fact_datadir }}/
+echo "Restoring fact data dir..."
+rsync -rvl "${tmpdir}{{ fact_datadir }}/"* {{ fact_datadir }}/
 
-systemctl start fact-db
-systemctl start fact-backend
-systemctl start fact-frontend
+echo "Restarting fact services..."
+systemctl start fact-db $systemd_args
+systemctl start fact-backend $systemd_args
+systemctl start fact-frontend $systemd_args
+
+echo "Done."
