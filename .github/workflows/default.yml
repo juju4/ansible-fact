@@ -159,6 +159,7 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -v https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2010.json.zip' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /tmp/kitchen/' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /tmp/kitchen/hosts' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /etc/passwd' || true
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'df -h' || true
           df -h
           sudo lxc storage list
@@ -199,8 +200,13 @@ jobs:
       - name: After script - logs
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
-          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main.log'
-          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_mongo.log'
+          set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main.log' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main_frontend.log' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main_backend.log' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_main_database.log' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_web.log' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/fact/fact_mongo.log' || true
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - nginx
@@ -211,5 +217,22 @@ jobs:
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /etc/nginx/nginx.conf'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'nginx -V'
           sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'nginx -t'
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - curl
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv https://localhost' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv http://localhost:5000' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'curl -kv http://localhost:27018' || true
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - clamav
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /var/lib/clamav/' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/clamav/freshclam.log' || true
         if: ${{ always() }}
         continue-on-error: true
