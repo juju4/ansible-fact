@@ -31,6 +31,8 @@ provisioner:
 platforms:
   - name: ubuntu-20.04
   - name: ubuntu-18.04
+  - name: fedora-35
+  - name: fedora-34
   - name: fedora-33
 
 suites:
