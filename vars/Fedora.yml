@@ -22,7 +22,7 @@ fact_pkgs:
   - unzip
   - clamav
   - clamav-update
-  # semanage
+  # semanage
   - policycoreutils-python-utils
   # Not in Fedora repo per license change, using rhel8 upstream
   # - mongodb
