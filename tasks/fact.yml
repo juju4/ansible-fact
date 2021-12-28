@@ -162,6 +162,7 @@
     requirements: "{{ fact_root }}/src/install/requirements_common.txt"
     executable: pip3
     extra_args: --upgrade --prefer-binary
+  failed_when: false
 
 - name: Fedora | Use systemctl for nginx restart
   lineinfile:
