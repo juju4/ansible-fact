@@ -3,6 +3,10 @@
 
 if [ "X$1" = "X33" ]; then
   image=fedora-33
+elif [ "X$1" = "X34" ]; then
+  image=fedora-34
+elif [ "X$1" = "X35" ]; then
+  image=fedora-35
 elif [ "X$1" = "X8" ]; then
   image=centos-8
 else
