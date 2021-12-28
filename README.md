@@ -56,6 +56,7 @@ $ KITCHEN_YAML=".kitchen.vagrant.yml" kitchen verify
 * CI has some known limitations has fact uses docker heavily and some restrictions apply inside github, kitchen and lxd.
 * pdf creation not working
 * some plugins are not working
+* On Fedora, Fact is used mongodb 3.6 and not planning to move to more recent releases because of license change. 3.6 is only available on Fedora 33 and 34.
 
 ## License
 

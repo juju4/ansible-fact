@@ -18,6 +18,11 @@ jobs:
       matrix:
         include:
           - distribution: fedora
+            version: 34
+            version2: 34
+            suite: default-HEAD
+            experimental: true
+          - distribution: fedora
             version: 33
             version2: 33
             suite: default-HEAD
