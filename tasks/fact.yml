@@ -172,6 +172,13 @@
     mode: '0644'
   when: ansible_distribution == 'Fedora'
 
+- name: Fact python installer - distutils workaround
+  replace:
+    dest: "{{ fact_root }}/src/install/common.py"
+    regexp: '^        if return_code != 0:'
+    replace: "        if return_code != 0 and 'UserWarning: Distutils was imported before Setuptools' not in output:"
+    mode: '0644'
+
 - name: FACT install - python way
   shell: |
     set -o pipefail
