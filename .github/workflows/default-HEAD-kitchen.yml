@@ -18,8 +18,13 @@ jobs:
       matrix:
         include:
           - distribution: fedora
-            version: 33
-            version2: 33
+            version: 35
+            version2: 35
+            suite: default-HEAD
+            experimental: true
+          - distribution: fedora
+            version: 34
+            version2: 34
             suite: default-HEAD
             experimental: true
           - distribution: ubuntu
@@ -33,7 +38,7 @@ jobs:
             suite: default-HEAD
             experimental: true
     env:
-      ANSIBLE_CALLBACK_WHITELIST: profile_tasks
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
       # ANSIBLE_EXTRA_FLAGS: "-e fact_nginx_shim=true -e fact_version=HEAD"
 
     steps:

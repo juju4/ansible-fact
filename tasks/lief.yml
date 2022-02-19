@@ -1,0 +1,25 @@
+---
+# https://github.com/MISP/MISP/blob/2.4/INSTALL/INSTALL.rhel7.txt#L368
+
+- name: Ensure lief dependencies are present
+  package:
+    name:
+      - cmake
+      - gcc
+    state: present
+
+- name: Install lief - may take a while
+  pip:
+    name: lief
+    state: present
+    version: "{{ fact_lief_version | default(omit) }}"
+    executable: pip3
+    extra_args: --upgrade --prefer-binary
+  register: pkg_result
+  until: pkg_result is success
+
+- name: Ensure LIEF is working
+  command: "python3 -c 'import lief'"
+  environment:
+    PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+  changed_when: false
