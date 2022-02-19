@@ -1,5 +1,5 @@
 ---
-name: AnsibleCI-HEAD
+name: default-HEAD-kitchen
 
 on:
   push:
