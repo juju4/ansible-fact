@@ -78,6 +78,28 @@
                ansible_virtualization_type == "lxc"
               )
             )
+    - name: Ensure mongod process is running
+      command: pgrep -u _fact mongod
+      register: ps3
+      changed_when: false
+      failed_when: false
+    - name: Validate ps output
+      assert:
+        that: ps3.stdout
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
+
+    - name: check all processes
+      command: ps aux
+      changed_when: false
+      register: psa
+    - name: Debug | ps aux output
+      debug: var=psa verbosity=1
+
     - name: Ensure ports are listening
       wait_for:
         host: "{{ item.h }}"
