@@ -50,4 +50,4 @@
 
 - name: pause
   pause:
-    seconds: 60
+    seconds: 180
