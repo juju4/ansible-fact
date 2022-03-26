@@ -58,8 +58,9 @@ jobs:
           pip3 show ansible
           ansible --version
           cd $GITHUB_WORKSPACE/juju4.fact
-          ansible-galaxy install -r molecule/default/requirements.yml
-          { echo '[defaults]'; echo 'callback_whitelist = profile_tasks, timer'; echo 'roles_path = ../'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
+          [ -f get-dependencies.sh ] && sh -x get-dependencies.sh
+          [ -f molecule/default/requirements.yml ] && ansible-galaxy install -r molecule/default/requirements.yml
+          { echo '[defaults]'; echo 'callback_whitelist = profile_tasks, timer'; echo 'roles_path = ../:/home/runner/.ansible/roles'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
           { echo '[facthosts]'; echo 'localhost'; } >> inventory
           cat inventory
           sed -ri 's/hosts: facthosts/hosts: all/' molecule/default/verify.yml
