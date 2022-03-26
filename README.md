@@ -58,6 +58,7 @@ $ KITCHEN_YAML=".kitchen.vagrant.yml" kitchen verify
 * some plugins are not working
 * On Fedora, Fact is used mongodb 3.6 and not planning to move to more recent releases because of license change. 3.6 is only available on Fedora 33 and 34.
 * RedHat/Centos8: the pip installed setuptools can mess up with some system tools like semanage. Remove pip installed one and `dnf reinstall python3-setuptools` to fix.
+* Current Fact 3.2 release from May 2021 does not install anymore cleanly - kitchen verify failing on mongodb port 27018. fine with HEAD.
 
 ## License
 
