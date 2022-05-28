@@ -18,7 +18,8 @@
   register: restored
   when: restorefile.stat.exists
 
-- block:
+- name: Restore backup
+  block:
     - name: Fact restore | Restore archive
       command: "{{ scriptsdir }}/restore-fact.sh /tmp/{{ fact_restore_archive | basename }}"
       args:

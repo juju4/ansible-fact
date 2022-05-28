@@ -5,7 +5,8 @@
 - name: Debug | ansible_service_mgr
   debug: var=ansible_service_mgr
 
-- block:
+- name: Minimum distribution release
+  block:
 
     - name: install systemd fact-db configuration
       template:
