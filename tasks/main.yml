@@ -12,6 +12,7 @@
   when: ansible_distribution == 'Fedora'
 
 - include_tasks: mongodb-thp.yml
+  when: fact_version is regex('^3\.')
 - include_tasks: fact.yml
 
 - include_tasks: backup-restore.yml
