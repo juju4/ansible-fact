@@ -12,7 +12,7 @@
       # mongodb custom
       - { h: localhost, p: 27018 }
   pre_tasks:
-    - name: Not container | Set fact
+    - name: Not container v3 | Set fact
       set_fact:
         fact_ports_verify:
           - { h: localhost, p: 443 }
@@ -26,6 +26,35 @@
                ansible_virtualization_type == "lxc"
               )
             )
+        and fact_version is regex('^3\.')
+    - name: Not container v4 | Set fact
+      set_fact:
+        fact_ports_verify:
+          - { h: localhost, p: 443 }
+          # postgres
+          - { h: localhost, p: 5432 }
+          # fact uwsgi
+          - { h: localhost, p: 5000 }
+      when: >
+        not (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
+        and fact_version is regex('^4\.')
+    - name: Container v4 | Set fact
+      set_fact:
+        fact_ports_verify:
+          - { h: localhost, p: 443 }
+          # postgres
+          - { h: localhost, p: 5432 }
+      when: >
+        (ansible_virtualization_type is defined and
+              (ansible_virtualization_type == "docker" or ansible_virtualization_type == "containerd" or
+               ansible_virtualization_type == "lxc"
+              )
+            )
+        and fact_version is regex('^4\.')
   tasks:
     - name: Check if needed pip packages are installed
       command: "pip freeze"
