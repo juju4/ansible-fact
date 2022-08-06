@@ -17,9 +17,6 @@ fact_pkgs:
   - python3-tlsh
   - unzip
   - clamav-daemon
-  - mongodb
-  # docker warning: auplink flush failed
-  - aufs-tools
   - jq
 
 fact_binwalk_pkgs:
