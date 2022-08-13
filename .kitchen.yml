@@ -36,9 +36,9 @@ platforms:
   - name: ubuntu-22.04
   - name: ubuntu-20.04
   - name: ubuntu-18.04
+  - name: fedora-37
+  - name: fedora-36
   - name: fedora-35
-  - name: fedora-34
-  - name: fedora-33
 
 suites:
   - name: default

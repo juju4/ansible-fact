@@ -18,8 +18,8 @@ jobs:
       matrix:
         include:
           - distribution: fedora
-            version: 33
-            version2: 33
+            version: 36
+            version2: 36
             suite: default
             experimental: true
           - distribution: ubuntu
