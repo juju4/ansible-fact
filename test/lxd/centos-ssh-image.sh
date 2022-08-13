@@ -7,6 +7,10 @@ elif [ "X$1" = "X34" ]; then
   image=fedora-34
 elif [ "X$1" = "X35" ]; then
   image=fedora-35
+elif [ "X$1" = "X36" ]; then
+  image=fedora-36
+elif [ "X$1" = "X37" ]; then
+  image=fedora-37
 elif [ "X$1" = "X8" ]; then
   image=centos-8
 else
