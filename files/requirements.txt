@@ -16,7 +16,7 @@ git+https://github.com/fkie-cad/common_helper_process.git
 git+https://github.com/fkie-cad/fact_helper_file.git
 git+https://github.com/mass-project/common_helper_encoder.git
 hurry.filesize
-lief==0.10.1
+lief==0.12.1
 matplotlib
 pip
 psutil
