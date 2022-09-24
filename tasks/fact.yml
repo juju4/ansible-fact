@@ -140,14 +140,6 @@
     mode: '0600'
   when: not mark.stat.exists
 
-- name: Update lief to latest 0.11.5
-  replace:
-    dest: "{{ fact_root }}/src/install/common.py"
-    regexp: lief==0.10.1
-    replace: lief==0.11.5
-    mode: '0644'
-  when: fact_version != 'HEAD'
-
 - name: Fedora 35+ | Remove setuptools requirements - conflicts with rpm
   lineinfile:
     dest: "{{ fact_root }}/src/install/requirements_common.txt"
