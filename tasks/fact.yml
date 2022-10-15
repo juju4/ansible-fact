@@ -2,26 +2,27 @@
 
 # https://github.com/fkie-cad/FACT_core/blob/master/INSTALL.md
 - name: Debian | refresh apt cache
-  apt:
+  ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
   when: ansible_os_family == "Debian"
 
-- import_tasks: redhat-mongodb.yml
+- name: Import redhat-mongodb
+  ansible.builtin.import_tasks: redhat-mongodb.yml
   when: ansible_os_family == "RedHat"
 
 - name: Update latest packages
-  package:  # noqa package-latest
+  ansible.builtin.package:  # noqa package-latest
     name: '*'
     state: latest
 
 - name: Ensure dependencies packages are present
-  package:
+  ansible.builtin.package:
     name: "{{ fact_pkgs }}"
     state: present
 
 - name: Ensure dedicated user exists
-  user:
+  ansible.builtin.user:
     name: _fact
     home: "{{ fact_home }}"
     comment: 'Firmware Analysis and Comparison Tool (FACT)'
@@ -30,8 +31,8 @@
     append: yes
     state: present
 
-- name: give sudoers access to fact user - at least for install
-  lineinfile:
+- name: Give sudoers access to fact user - at least for install
+  ansible.builtin.lineinfile:
     dest: /etc/sudoers.d/fact-user
     line: "{{ fact_user }} ALL=(ALL) NOPASSWD:ALL"
     mode: '0440'
@@ -39,14 +40,14 @@
     backup: "{{ fact_backup | default(false) }}"
 
 - name: Ensure right permissions for ansible remote_tmp
-  file:
+  ansible.builtin.file:
     path: "{{ fact_home }}/.ansible/tmp"
     state: directory
     mode: '0700'
     owner: "{{ fact_user }}"
 
-- name: clone FACT repository
-  git:
+- name: Clone FACT repository
+  ansible.builtin.git:
     repo: "{{ fact_repo }}"
     dest: "{{ fact_root }}"
     version: "{{ fact_version }}"
@@ -56,7 +57,7 @@
   become_user: "{{ fact_user }}"
 
 - name: Ensure directories exist
-  file:
+  ansible.builtin.file:
     path: "{{ item.p }}"
     state: directory
     owner: "{{ fact_user }}"
@@ -67,7 +68,7 @@
     - { p: "{{ fact_root }}/src/bin", m: '0700' }
 
 - name: FACT pre-install | pip dependencies
-  pip:
+  ansible.builtin.pip:
     name:
       - pip
       - virtualenv
@@ -82,24 +83,24 @@
     extra_args: --upgrade
 
 - name: Pull Docker images
-  docker_image:
+  community.general.docker_image:
     name: "{{ item }}"
     source: pull
   with_items: "{{ fact_docker_images }}"
 
 - name: Check if freshclam completed main.cvd download
-  stat:
+  ansible.builtin.stat:
     path: /var/lib/clamav/main.cvd
   register: cvd
 - name: Ensure dependencies services are started
-  service:
+  ansible.builtin.service:
     name: clamav-daemon
     state: started
   when: ansible_os_family == "Debian" and cvd.stat.exists
 
 # review src/config/main.cfg, src/config/mongod.conf
 - name: Update config
-  ini_file:
+  community.general.ini_file:
     path: "{{ fact_root }}/src/config/main.cfg"
     section: "{{ item.s }}"
     option: "{{ item.o }}"
@@ -108,12 +109,12 @@
     backup: "{{ fact_backup | default(false) }}"
   with_items: "{{ fact_main_config }}"
   notify:
-    - restart fact-db
-    - restart fact-backend
-    - restart fact-frontend
+    - Restart fact-db
+    - Restart fact-backend
+    - Restart fact-frontend
 
 - name: Github | review nginx.conf
-  replace:
+  ansible.builtin.replace:
     dest: "{{ fact_root }}/src/config/nginx.conf"
     regexp: "{{ item.re }}"
     replace: "{{ item.rep }}"
@@ -124,41 +125,43 @@
   when: fact_nginx_shim
 
 - name: Nginx | Ensure logs in target directory
-  replace:
+  ansible.builtin.replace:
     dest: "{{ fact_root }}/src/config/nginx.conf"
     regexp: "access_log .* compression;"
     replace: "access_log {{ fact_logdir }}/fact_web.log compression;"
     mode: '0644'
 
 - name: Check if marker exists
-  stat: path="{{ fact_root }}/.before_install_py"
+  ansible.builtin.stat:
+    path: "{{ fact_root }}/.before_install_py"
   register: mark
-- name: marker
-  file:
+- name: Add marker
+  ansible.builtin.file:
     path: "{{ fact_root }}/.before_install_py"
     state: touch
     mode: '0600'
   when: not mark.stat.exists
 
 - name: Fedora 35+ | Remove setuptools requirements - conflicts with rpm
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ fact_root }}/src/install/requirements_common.txt"
     regexp: '^setuptools'
     state: absent
     mode: '0644'
   when: ansible_distribution == 'Fedora' and ansible_distribution_major_version|int >= 35
 
-- import_tasks: lief.yml
+- name: Import lief
+  ansible.builtin.import_tasks: lief.yml
 
 - name: FACT pre-install | pip dependencies requirements_common
-  pip:
+  ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_common.txt"
     executable: pip3
     extra_args: --upgrade --prefer-binary
   failed_when: false
 
 - name: Fedora | Use systemctl for nginx restart
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: "{{ fact_root }}/src/install/frontend.py"
     regexp: "^    nginx_output, nginx_code = execute_shell_command_get_return_code.'sudo (.*)'.$"
     line: "    nginx_output, nginx_code = execute_shell_command_get_return_code('sudo systemctl restart nginx')"
@@ -166,14 +169,14 @@
   when: ansible_distribution == 'Fedora'
 
 - name: Fact python installer - distutils workaround
-  replace:
+  ansible.builtin.replace:
     dest: "{{ fact_root }}/src/install/common.py"
     regexp: '^        if return_code != 0:'
     replace: "        if return_code != 0 and 'UserWarning: Distutils was imported before Setuptools' not in output:"
     mode: '0644'
 
 - name: FACT install - python way
-  shell: |
+  ansible.builtin.shell: |
     set -o pipefail
     {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
   args:
@@ -186,4 +189,5 @@
   #   - remove sudo access
   # when: false
 
-- import_tasks: systemd.yml
+- name: Import systemd
+  ansible.builtin.import_tasks: systemd.yml

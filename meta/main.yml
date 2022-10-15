@@ -15,4 +15,4 @@ galaxy_info:
     - firmware
     - analysis
 dependencies:
-  - geerlingguy.docker
+  - role: geerlingguy.docker

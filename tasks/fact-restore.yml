@@ -1,32 +1,32 @@
 ---
 
 - name: Fact restore | Copy backup archive
-  copy:
+  ansible.builtin.copy:
     src: "{{ fact_restore_archive }}"
     dest: /tmp
     mode: preserve
 
 - name: Fact restore | Get database restore file hash
-  stat:
+  ansible.builtin.stat:
     path: "/tmp/{{ fact_restore_archive | basename }}"
     checksum_algorithm: sha256
   register: restorefile
 
 - name: Fact restore | Check if restore marker is present
-  stat:
+  ansible.builtin.stat:
     path: "/root/.fact_restore-{{ restorefile.stat.checksum }}"
   register: restored
   when: restorefile.stat.exists
 
 - name: Restore backup
+  when: restorefile.stat.exists and not restored.stat.exists
   block:
     - name: Fact restore | Restore archive
-      command: "{{ scriptsdir }}/restore-fact.sh /tmp/{{ fact_restore_archive | basename }}"
+      ansible.builtin.command: "{{ scriptsdir }}/restore-fact.sh /tmp/{{ fact_restore_archive | basename }}"
       args:
         creates: "/root/.fact_restore-{{ restorefile.stat.checksum }}"
     - name: Fact restore | add restoration marker
-      file:
+      ansible.builtin.file:
         dest: "/root/.fact_restore-{{ restorefile.stat.checksum }}"
         mode: '0600'
         state: touch
-  when: restorefile.stat.exists and not restored.stat.exists

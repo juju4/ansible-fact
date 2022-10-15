@@ -1,16 +1,16 @@
 ---
 # handlers file for juju4.fact
 
-- name: reload systemd
-  systemd:
+- name: Reload systemd
+  ansible.builtin.systemd:
     daemon_reload: yes
   when: >
     not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker")
         )
 
-- name: restart fact-db
-  service:
+- name: Restart fact-db
+  ansible.builtin.service:
     name: fact-db
     state: restarted
   when: >
@@ -18,8 +18,8 @@
           (ansible_virtualization_type == "docker")
         )
 
-- name: restart fact-backend
-  service:
+- name: Restart fact-backend
+  ansible.builtin.service:
     name: fact-backend
     state: restarted
   when: >
@@ -27,8 +27,8 @@
           (ansible_virtualization_type == "docker")
         )
 
-- name: restart fact-frontend
-  service:
+- name: Restart fact-frontend
+  ansible.builtin.service:
     name: fact-frontend
     state: restarted
   when: >
@@ -36,18 +36,20 @@
           (ansible_virtualization_type == "docker")
         )
 
-- name: restart rsyslog
-  service: name=rsyslog state=restarted
+- name: Restart rsyslog
+  ansible.builtin.service:
+    name: rsyslog
+    state: restarted
   when: >
     not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker")
         )
 
-- name: users_and_passwords-update_password_list
-  command: python3 update_password_list.py
+- name: Users_and_passwords-update_password_list
+  ansible.builtin.command: python3 update_password_list.py
   args:
     chdir: "{{ fact_root }}/src/plugins/analysis/users_and_passwords/internal"
 
-- name: pause
-  pause:
+- name: Pause
+  ansible.builtin.pause:
     seconds: 180

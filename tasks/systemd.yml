@@ -1,15 +1,21 @@
 ---
 
 - name: Debug | ansible_virtualization_type
-  debug: var=ansible_virtualization_type
+  ansible.builtin.debug:
+    var: ansible_virtualization_type
 - name: Debug | ansible_service_mgr
-  debug: var=ansible_service_mgr
+  ansible.builtin.debug:
+    var: ansible_service_mgr
 
 - name: Minimum distribution release
+  # when: ansible_service_mgr == 'systemd'
+  when: >
+    (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 16) or
+    (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
   block:
 
-    - name: install systemd fact-db configuration
-      template:
+    - name: Install systemd fact-db configuration
+      ansible.builtin.template:
         src: "systemd-fact-db.service.j2"
         dest: "/lib/systemd/system/fact-db.service"
         mode: '0644'
@@ -17,11 +23,11 @@
       register: systemd
       ignore_errors: true
       notify:
-        - reload systemd
-        - "restart fact-db"
+        - Reload systemd
+        - "Restart fact-db"
 
-    - name: install systemd fact-backend configuration
-      template:
+    - name: Install systemd fact-backend configuration
+      ansible.builtin.template:
         src: "systemd-fact-backend.service.j2"
         dest: "/lib/systemd/system/fact-backend.service"
         mode: '0644'
@@ -29,11 +35,11 @@
       register: systemd
       ignore_errors: true
       notify:
-        - reload systemd
-        - "restart fact-backend"
+        - Reload systemd
+        - "Restart fact-backend"
 
-    - name: install systemd fact-frontend configuration
-      template:
+    - name: Install systemd fact-frontend configuration
+      ansible.builtin.template:
         src: "systemd-fact-frontend.service.j2"
         dest: "/lib/systemd/system/fact-frontend.service"
         mode: '0644'
@@ -41,19 +47,14 @@
       register: systemd
       ignore_errors: true
       notify:
-        - reload systemd
-        - "restart fact-frontend"
-
-  # when: ansible_service_mgr == 'systemd'
-  when: >
-    (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 16) or
-    (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
+        - Reload systemd
+        - "Restart fact-frontend"
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers
 
-- name: enable and start fact systemd service
-  service:
+- name: Enable and start fact systemd service
+  ansible.builtin.service:
     name: "fact-{{ item }}"
     enabled: "{{ fact_svc_enable | default(true) }}"
     state: "{{ fact_svc_state | default('started') }}"
@@ -62,11 +63,11 @@
     - backend
     - frontend
   notify:
-    - pause
+    - Pause
   when: >
     not (ansible_virtualization_type is defined and
           (ansible_virtualization_type == "docker")
         )
 
 - name: Flush handlers
-  meta: flush_handlers
+  ansible.builtin.meta: flush_handlers

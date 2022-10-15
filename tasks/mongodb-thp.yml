@@ -3,14 +3,14 @@
 # https://askubuntu.com/questions/597372/how-do-i-modify-sys-kernel-mm-transparent-hugepage-enabled
 
 - name: Ensure packages mongodb and sysfsutils are present
-  package:
+  ansible.builtin.package:
     name:
       - mongodb
       - sysfsutils
     state: present
 
 - name: Set transparent_hugepage
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/sysfs.conf
     regexp: '^kernel/mm/transparent_hugepage/enabled = .*'
     line: 'kernel/mm/transparent_hugepage/enabled = never'

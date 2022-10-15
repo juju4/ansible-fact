@@ -1,7 +1,7 @@
 ---
 
 - name: RedHat | Set up mongodb upstream repository
-  template:
+  ansible.builtin.template:
     src: yum-rhel8-mongodb.repo.j2
     dest: /etc/yum.repos.d/mongodb.repo
     mode: '0644'
