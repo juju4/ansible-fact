@@ -128,7 +128,7 @@
       ansible.builtin.command: ps aux
       changed_when: false
       register: psa
-    - name: Debug | ps aux output
+    - name: Debug | Process output
       ansible.builtin.debug:
         var: psa
         verbosity: 1
@@ -151,7 +151,7 @@
       ansible.builtin.assert:
         that: >
           "'sockets' in web1.content and 'workers' in web1.content"
-    - name: Debug | web1
+    - name: Debug | Web output localhost:9191
       ansible.builtin.debug:
         var: web1
 
@@ -166,7 +166,7 @@
       ansible.builtin.assert:
         that: >
           "'<title>FACT</title>' in web2.content and '<h4 class=\"card-title mb-3\">Latest Firmware Submissions</h4>' in web2.content"
-    - name: Debug | web2
+    - name: Debug | Web output localhost
       ansible.builtin.debug:
         var: web2
 
@@ -187,7 +187,7 @@
                ansible_virtualization_type == "lxc"
               )
             )
-    - name: Debug | web3
+    - name: Debug | Web output localhost:5000
       ansible.builtin.debug:
         var: web3
 
@@ -202,7 +202,7 @@
       ansible.builtin.assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4.content and '<h5 class=\"card-title\">backend status</h5>' in web4.content"
-    - name: Debug | web4
+    - name: Debug | Web output localhost:5000/system_health
       ansible.builtin.debug:
         var: web4
 
@@ -217,7 +217,7 @@
       ansible.builtin.assert:
         that: >
           "'<h5 class=\"card-title\">frontend status</h5>' in web4b.content and '<h5 class=\"card-title\">backend status</h5>' in web4b.content"
-    - name: Debug | web4b
+    - name: Debug | Web output localhost/system_health
       ansible.builtin.debug:
         var: web4b
 
@@ -232,7 +232,7 @@
       ansible.builtin.assert:
         that: >
           "'request' in rest1.content and 'request_resource' in rest1.content"
-    - name: Debug | rest1
+    - name: Debug | Web query output
       ansible.builtin.debug:
         var: rest1
         verbosity: 1
@@ -254,7 +254,7 @@
       ansible.builtin.assert:
         that: >
           "'request' in rest2.content and 'request_resource' in rest2.content"
-    - name: Debug | rest2
+    - name: Debug | Web submit output
       ansible.builtin.debug:
         var: rest2
         verbosity: 1
@@ -294,7 +294,7 @@
       ansible.builtin.assert:
         that: >
           "'request' in rest2b.content and 'request_resource' in rest2b.content"
-    - name: Debug | rest2b
+    - name: Debug | Web rest output
       ansible.builtin.debug:
         var: rest2b
         verbosity: 1
@@ -310,7 +310,7 @@
       ansible.builtin.assert:
         that: >
           "'system_status' in rest3.content and 'request_resource' in rest3.content"
-    - name: Debug | rest3
+    - name: Debug | Web rest output
       ansible.builtin.debug:
         var: rest3
         verbosity: 1
