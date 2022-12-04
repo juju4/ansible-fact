@@ -69,18 +69,9 @@
 
 - name: FACT pre-install | pip dependencies
   ansible.builtin.pip:
-    name:
-      - pip
-      - virtualenv
-      - distro
-      - python-magic
-      - requests
-      - docker
-      - pymongo<4
-      - git+https://github.com/fkie-cad/common_helper_files.git
-      - git+https://github.com/fkie-cad/common_helper_process.git
+    requirements: "{{ fact_root }}/src/install/requirements_pre_install.txt"
     executable: pip3
-    extra_args: --upgrade
+    extra_args: --upgrade --prefer-binary
 
 - name: Pull Docker images
   community.general.docker_image:
