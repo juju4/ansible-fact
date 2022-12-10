@@ -67,6 +67,12 @@
     - { p: "{{ fact_logdir }}", m: '0700' }
     - { p: "{{ fact_root }}/src/bin", m: '0700' }
 
+- name: FACT pre-install | Add docker to pip requirements for ansible module
+  ansible.builtin.lineinfile:
+    dest: "{{ fact_root }}/src/install/requirements_pre_install.txt"
+    mode: 0644
+    line: docker
+
 - name: FACT pre-install | pip dependencies
   ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_pre_install.txt"
