@@ -1,4 +1,5 @@
 ---
 
 - name: geerlingguy.docker
+- name: geerlingguy.nodejs
 - name: geerlingguy.postgresql
