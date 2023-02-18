@@ -1,5 +1,6 @@
 ---
 
-- name: geerlingguy.docker
-- name: geerlingguy.nodejs
-- name: geerlingguy.postgresql
+roles:
+  - name: geerlingguy.docker
+  - name: geerlingguy.nodejs
+  - name: geerlingguy.postgresql
