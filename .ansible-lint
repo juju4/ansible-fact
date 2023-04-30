@@ -1,5 +1,3 @@
 ---
 warn_list:
   - experimental
-exclude_paths:
-  - test/integration/default*/default.yml
