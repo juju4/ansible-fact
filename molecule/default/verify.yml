@@ -286,8 +286,6 @@
     - name: Submit test firmware from FACT server  # noqa command-instead-of-module no-changed-when
       ansible.builtin.command: >
         curl -k {{ fact_url }}/rest/firmware -X PUT -H "Content-Type: application/json" -d @/tmp/firmware-submit2.json
-      args:
-        warn: false
       register: rest2b
       failed_when: false
     - name: Validate rest2b

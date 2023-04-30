@@ -45,7 +45,7 @@
           (ansible_virtualization_type == "docker")
         )
 
-- name: Users_and_passwords-update_password_list
+- name: Users_and_passwords-update_password_list  # noqa no-changed-when
   ansible.builtin.command: python3 update_password_list.py
   args:
     chdir: "{{ fact_root }}/src/plugins/analysis/users_and_passwords/internal"
