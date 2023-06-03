@@ -21,4 +21,4 @@
 
 - name: Verify playbook
   # import_playbook: verify.yml
-  import_playbook: ../../../molecule/default/verify.yml
+  import_playbook: molecule/default/verify.yml
