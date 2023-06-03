@@ -21,6 +21,11 @@
     name: "{{ fact_pkgs }}"
     state: present
 
+- name: Ensure conflict packages are absent
+  ansible.builtin.package:
+    name: "{{ fact_conflict_pkgs | default([]) }}"
+    state: absent
+
 - name: Ensure dedicated user exists
   ansible.builtin.user:
     name: _fact

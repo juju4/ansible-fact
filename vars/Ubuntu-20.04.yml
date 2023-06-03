@@ -21,6 +21,10 @@ fact_pkgs:
   - aufs-tools
   - jq
 
+fact_conflict_pkgs:
+  - python-blinker
+  - python3-blinker
+
 fact_binwalk_pkgs:
   - xvfb
 

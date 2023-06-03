@@ -29,6 +29,9 @@ fact_pkgs:
   - mongodb-org
   - nginx
 
+fact_conflict_pkgs:
+  - python3-pip
+
 fact_binwalk_pkgs:
   - xorg-x11-server-Xvfb
 
