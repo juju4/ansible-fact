@@ -21,11 +21,6 @@
     name: "{{ fact_pkgs }}"
     state: present
 
-- name: Ensure conflict packages are absent
-  ansible.builtin.package:
-    name: "{{ fact_conflict_pkgs | default([]) }}"
-    state: absent
-
 - name: Ensure dedicated user exists
   ansible.builtin.user:
     name: _fact
@@ -176,6 +171,11 @@
     regexp: '^        if return_code != 0:'
     replace: "        if return_code != 0 and 'UserWarning: Distutils was imported before Setuptools' not in output:"
     mode: '0644'
+
+- name: Ensure conflict packages are absent
+  ansible.builtin.package:
+    name: "{{ fact_conflict_pkgs | default([]) }}"
+    state: absent
 
 - name: FACT install - python way
   ansible.builtin.shell: |
