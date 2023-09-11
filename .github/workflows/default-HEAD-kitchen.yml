@@ -45,7 +45,7 @@ jobs:
       # ANSIBLE_EXTRA_FLAGS: "-e fact_nginx_shim=true -e fact_version=HEAD"
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           path: juju4.fact
       - name: Set up Python
