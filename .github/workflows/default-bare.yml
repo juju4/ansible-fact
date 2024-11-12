@@ -1,0 +1,186 @@
+---
+name: default-bare
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  schedule:  # run weekly, every Tuesday 04:00
+    - cron: '0 4 * * 2'
+
+permissions: {}
+
+jobs:
+  build:
+    permissions:
+      contents: read
+    runs-on: ubuntu-${{ matrix.version }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        include:
+          - distribution: ubuntu
+            version: '24.04'
+            suite: default
+            experimental: true
+          - distribution: ubuntu
+            version: '22.04'
+            suite: default
+            experimental: true
+          - distribution: ubuntu
+            version: '20.04'
+            suite: default
+            experimental: true
+    env:
+      ANSIBLE_CALLBACKS_ENABLED: profile_tasks
+      ANSIBLE_EXTRA_VARS: "-e fact_nginx_shim=true"
+      ANSIBLE_ROLE: juju4.fact
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: ${{ env.ANSIBLE_ROLE }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip3 install ansible-lint flake8 yamllint
+          pip3 install python-debian
+          which ansible
+          pip3 install ansible
+          pip3 show ansible
+          ls -l $HOME/.local/bin || true
+          ls -l /opt/hostedtoolcache/Python/3.9.1/x64/bin || true
+          echo "/opt/hostedtoolcache/Python/3.9.1/x64/bin" >> $GITHUB_PATH
+          which ansible
+          ansible --version
+          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE
+          [ -f get-dependencies.sh ] && sh -x get-dependencies.sh
+          [ -f molecule/default/requirements.yml ] && ansible-galaxy install -r molecule/default/requirements.yml
+          { echo '[defaults]'; echo 'callbacks_enabled = profile_tasks, timer'; echo 'roles_path = ../'; echo 'ansible_python_interpreter: /usr/bin/python3'; } >> ansible.cfg
+          { echo '[facthosts]'; echo 'localhost'; } >> inventory
+          cat inventory
+          sed -ri 's/hosts: facthosts/hosts: all/' molecule/default/verify.yml
+      - name: Environment
+        run: |
+          pwd
+          env
+          find -ls
+          df -h
+      - name: Free disk space
+        run: |
+          sudo rm -Rf /usr/local/lib/android
+          df -h
+      - name: Mongodb - Disable Transparent Huge Pages (THP)
+        run: |
+          cat /sys/kernel/mm/transparent_hugepage/enabled
+          echo never | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
+          cat /sys/kernel/mm/transparent_hugepage/enabled
+      - name: Before script - systemctl
+        run: |
+          systemd-analyze security || true
+          systemctl status --all --no-pager || true
+      - name: run test
+        run: |
+          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE && ansible-playbook -i localhost, --connection=local --become -vvv test/integration/${{ matrix.suite }}/default.yml ${ANSIBLE_EXTRA_VARS}
+        env:
+          PY_COLORS: '1'
+          ANSIBLE_FORCE_COLOR: '1'
+      - name: idempotency run
+        run: |
+          cd $GITHUB_WORKSPACE/$ANSIBLE_ROLE && ansible-playbook -i localhost, --connection=local --become -vvv test/integration/${{ matrix.suite }}/default.yml ${ANSIBLE_EXTRA_VARS} | tee /tmp/idempotency.log | grep -q 'changed=0.*failed=0'  && (echo 'Idempotence test: pass' && exit 0)  || (echo 'Idempotence test: fail' && cat /tmp/idempotency.log && exit 0)
+      - name: On failure
+        run: |
+          systemctl -l --no-pager status
+          systemctl -l --no-pager --failed
+          ls -l /usr/bin/ | egrep '(python|pip|ansible)'
+          pip freeze
+          pip3 freeze
+          ip addr
+          cat /etc/resolv.conf
+          host www.google.com
+          ping -c 1 www.google.com || true
+          ping -c 1 8.8.8.8 || true
+          ps auxw || true
+          cat /etc/passwd || true
+          df -h || true
+        if: ${{ failure() }}
+        continue-on-error: true
+      - name: After script - ansible setup
+        run: |
+          ansible -i inventory --connection=local -m setup localhost
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - systemd
+        run: |
+          systemctl -l --no-pager status fact-backend || true
+          systemctl -l --no-pager status fact-db || true
+          systemctl -l --no-pager status fact-frontend || true
+          systemctl -l --no-pager status mongodb || true
+          systemctl -l --no-pager status nginx || true
+          systemctl -l --no-pager status docker || true
+          systemd-analyze security || true
+          systemctl --failed || true
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - journalctl
+        run: |
+          journalctl -xe --no-pager || true
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - files
+        run: |
+          ls -lR /var/_fact/FACT_core/
+          ls -lR /var/_fact/FACT_core/src/config
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - config
+        run: |
+          cat /var/_fact/FACT_core/src/config/main.cfg
+          cat /var/_fact/FACT_core/src/config/mongod.conf
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - logs
+        run: |
+          set -x
+          cat /var/log/fact/fact_main.log || true
+          cat /var/log/fact/fact_main_frontend.log || true
+          cat /var/log/fact/fact_main_backend.log || true
+          cat /var/log/fact/fact_main_database.log || true
+          cat /var/log/fact/fact_web.log || true
+          cat /var/log/fact/fact_mongo.log || true
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - nginx
+        run: |
+          find /etc/nginx -type f -ls
+          ls -la /etc/nginx/nginx.conf
+          cat /etc/nginx/nginx.conf
+          nginx -V
+          nginx -t
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - curl
+        run: |
+          set -x
+          curl -kv https://localhost || true
+          curl -kv http://localhost:5000 || true
+          curl -kv http://localhost:27018 || true
+          curl -v https://luarocks.org/ || true
+          host nvd.nist.gov || true
+          curl -v https://nvd.nist.gov/feeds/json/cve/1.1/nvdcve-1.1-2010.json.zip || true
+        if: ${{ always() }}
+        continue-on-error: true
+      - name: After script - clamav
+        run: |
+          cd $GITHUB_WORKSPACE/juju4.fact
+          set -x
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /var/lib/clamav/' || true
+          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/clamav/freshclam.log' || true
+        if: ${{ always() }}
+        continue-on-error: true
