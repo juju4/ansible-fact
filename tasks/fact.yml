@@ -76,8 +76,11 @@
 - name: FACT pre-install | pip dependencies
   ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_pre_install.txt"
-    executable: pip3
     extra_args: --upgrade --prefer-binary
+    virtualenv: "{{ fact_virtualenv }}"
+    virtualenv_command: "/usr/bin/python3 -m venv"
+  become: yes
+  become_user: "{{ fact_user }}"
 
 - name: Pull Docker images
   community.general.docker_image:
@@ -153,8 +156,10 @@
 - name: FACT pre-install | pip dependencies requirements_common
   ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_common.txt"
-    executable: pip3
     extra_args: --upgrade --prefer-binary
+    virtualenv: "{{ fact_virtualenv }}"
+  become: yes
+  become_user: "{{ fact_user }}"
   failed_when: false
 
 - name: Fedora | Use systemctl for nginx restart
@@ -180,7 +185,7 @@
 - name: FACT install - python way
   ansible.builtin.shell: |
     set -o pipefail
-    {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
+    {{ fact_virtualenv }}/bin/python {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
   args:
     chdir: "{{ fact_root }}"
     creates: "{{ fact_root }}/src/objects/__pycache__"
