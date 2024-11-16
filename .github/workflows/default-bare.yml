@@ -135,25 +135,25 @@ jobs:
         continue-on-error: true
       - name: After script - files
         run: |
-          ls -lR /var/_fact/FACT_core/
-          ls -lR /var/_fact/FACT_core/src/config
+          sudo ls -lR /var/_fact/FACT_core/
+          sudo ls -lR /var/_fact/FACT_core/src/config
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - config
         run: |
-          cat /var/_fact/FACT_core/src/config/main.cfg
-          cat /var/_fact/FACT_core/src/config/mongod.conf
+          sudo cat /var/_fact/FACT_core/src/config/main.cfg
+          sudo cat /var/_fact/FACT_core/src/config/mongod.conf
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - logs
         run: |
           set -x
-          cat /var/log/fact/fact_main.log || true
-          cat /var/log/fact/fact_main_frontend.log || true
-          cat /var/log/fact/fact_main_backend.log || true
-          cat /var/log/fact/fact_main_database.log || true
-          cat /var/log/fact/fact_web.log || true
-          cat /var/log/fact/fact_mongo.log || true
+          sudo cat /var/log/fact/fact_main.log || true
+          sudo cat /var/log/fact/fact_main_frontend.log || true
+          sudo cat /var/log/fact/fact_main_backend.log || true
+          sudo cat /var/log/fact/fact_main_database.log || true
+          sudo cat /var/log/fact/fact_web.log || true
+          sudo cat /var/log/fact/fact_mongo.log || true
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - nginx
@@ -163,6 +163,8 @@ jobs:
           cat /etc/nginx/nginx.conf
           nginx -V
           nginx -t
+          ls -la /run/
+          sudo ls -la /var/log/nginx/
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - curl
@@ -180,7 +182,7 @@ jobs:
         run: |
           cd $GITHUB_WORKSPACE/juju4.fact
           set -x
-          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'ls -lA /var/lib/clamav/' || true
-          sudo kitchen exec ${{ matrix.suite }}-${{ matrix.distribution }}-${{ matrix.version2 }} -c 'cat /var/log/clamav/freshclam.log' || true
+          ls -lA /var/lib/clamav/ || true
+          cat /var/log/clamav/freshclam.log || true
         if: ${{ always() }}
         continue-on-error: true
