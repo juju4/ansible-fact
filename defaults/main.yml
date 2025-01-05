@@ -8,7 +8,7 @@ fact_home: /var/_fact
 fact_root: /var/_fact/FACT_core
 fact_logdir: /var/log/fact
 fact_datadir: /media/data
-fact_virtualenv: /var/_fact/venv
+# fact_python_virtualenv: /var/_fact/venv
 
 fact_docker_images:
   - crazymax/linguist

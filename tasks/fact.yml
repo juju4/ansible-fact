@@ -39,6 +39,14 @@
     create: yes
     backup: "{{ fact_backup | default(false) }}"
 
+# /var/_fact/FACT_core/src/web_interface/templates/maintenance.html
+- name: Allow nobody (nginx) to traverse home
+  ansible.posix.acl:
+    path: "{{ fact_home }}"
+    entity: nobody
+    etype: user
+    permissions: x
+
 - name: Ensure right permissions for ansible remote_tmp
   ansible.builtin.file:
     path: "{{ fact_home }}/.ansible/tmp"
@@ -77,16 +85,30 @@
   ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_pre_install.txt"
     extra_args: --upgrade --prefer-binary
-    virtualenv: "{{ fact_virtualenv }}"
-    virtualenv_command: "/usr/bin/python3 -m venv"
+    virtualenv: "{{ fact_python_virtualenv | default(omit) }}"
   become: yes
   become_user: "{{ fact_user }}"
+
+- name: FACT pre-install | pip dependencies non-virtualenv
+  ansible.builtin.package:
+    name:
+      - python3-requests
+      - python3-docker
+  when:
+    - fact_python_virtualenv is defined
+    - fact_python_virtualenv | length > 0
+
+- name: Import proxy
+  ansible.builtin.import_tasks: proxy.yml
 
 - name: Pull Docker images
   community.general.docker_image:
     name: "{{ item }}"
     source: pull
   with_items: "{{ fact_docker_images }}"
+  # FIXME! not working
+  # environment:
+  #   ansible_python_interpreter: "{{ fact_python_virtualenv_bin | default(omit) }}"
 
 - name: Check if freshclam completed main.cvd download
   ansible.builtin.stat:
@@ -150,6 +172,16 @@
     mode: '0644'
   when: ansible_distribution == 'Fedora' and ansible_distribution_major_version|int >= 35
 
+- name: Ubuntu 24.04+ | Remove setuptools requirements
+  ansible.builtin.replace:
+    dest: "{{ fact_root }}/src/install/common.py"
+    regexp: "run_cmd_with_logging\\('pip install -U pip setuptools wheel'\\)"
+    replace: "run_cmd_with_logging('echo DISABLED pip install -U pip setuptools wheel')"
+    mode: '0644'
+  when:
+    - ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 24
+    - false  # should not be needed if virtualenv is detected correctly
+
 - name: Import lief
   ansible.builtin.import_tasks: lief.yml
 
@@ -157,7 +189,7 @@
   ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_common.txt"
     extra_args: --upgrade --prefer-binary
-    virtualenv: "{{ fact_virtualenv }}"
+    virtualenv: "{{ fact_python_virtualenv | default(omit) }}"
   become: yes
   become_user: "{{ fact_user }}"
   failed_when: false
@@ -185,7 +217,7 @@
 - name: FACT install - python way
   ansible.builtin.shell: |
     set -o pipefail
-    {{ fact_virtualenv }}/bin/python {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
+    python {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
   args:
     chdir: "{{ fact_root }}"
     creates: "{{ fact_root }}/src/objects/__pycache__"
@@ -194,7 +226,23 @@
   become_user: "{{ fact_user }}"
   # notify:
   #   - remove sudo access
-  # when: false
+  when:
+    - fact_python_virtualenv is not defined or fact_python_virtualenv == None
+
+- name: FACT install - virtualenv python way
+  ansible.builtin.shell: |
+    set -o pipefail
+    . {{ fact_python_virtualenv }}/bin/activate
+    python {{ fact_root }}/src/install.py -N -U | tee {{ fact_root }}/install.log
+  args:
+    chdir: "{{ fact_root }}"
+    creates: "{{ fact_root }}/src/objects/__pycache__"
+    executable: /bin/bash
+  become: yes
+  become_user: "{{ fact_user }}"
+  when:
+    - fact_python_virtualenv is defined
+    - fact_python_virtualenv | length > 0
 
 - name: Import systemd
   ansible.builtin.import_tasks: systemd.yml

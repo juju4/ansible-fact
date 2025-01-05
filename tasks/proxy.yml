@@ -1,0 +1,47 @@
+---
+
+- name: Proxy
+  when:
+    - proxy_env|string
+  block:
+    # https://docs.docker.com/engine/cli/proxy/
+    # https://docs.docker.com/engine/daemon/proxy/
+    - name: Ensure .docker directory exists
+      ansible.builtin.file:
+        path: "{{ item.p }}"
+        mode: '0700'
+        owner: "{{ item.o }}"
+        state: directory
+      loop:
+        - { p: /root/.docker, o: root }
+        - { p: /var/_fact/.docker, o: _fact }
+
+    - name: Add docker proxy configuration
+      ansible.builtin.template:
+        src: docker-config.json.j2
+        dest: "{{ item.p }}/config.json"
+        mode: '0600'
+        owner: "{{ item.o }}"
+      loop:
+        - { p: /root/.docker, o: root }
+        - { p: /var/_fact/.docker, o: _fact }
+    - name: Ensure /etc/systemd/system/docker.service.d exists
+      ansible.builtin.file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        mode: '0755'
+    - name: Configure docker service with proxy
+      ansible.builtin.copy:
+        content: |
+          [Service]
+          EnvironmentFile=/etc/environment
+        dest: /etc/systemd/system/docker.service.d/proxy.conf
+        mode: '0644'
+      notify:
+        - Reload systemd
+        - Restart docker
+    - name: Docker build with proxy arguments
+      ansible.builtin.shell:  # noqa no-changed-when
+        cmd: docker build --build-arg HTTP_PROXY=$http_proxy --build-arg HTTPS_PROXY=$http_proxy --build-arg NO_PROXY="$no_proxy" --build-arg http_proxy=$http_proxy --build-arg https_proxy=$http_proxy --build-arg no_proxy="$no_proxy"  -t fact/john:alpine-3.18 .
+      args:
+        chdir: "{{ fact_home }}/FACT_core/src/plugins/analysis/users_and_passwords/docker"

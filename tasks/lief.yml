@@ -13,8 +13,8 @@
     name: lief
     state: present
     version: "{{ fact_lief_version | default(omit) }}"
-    executable: pip3
     extra_args: --upgrade --prefer-binary
+    virtualenv: "{{ fact_python_virtualenv | default(omit) }}"
   register: pkg_result
   until: pkg_result is success
 
@@ -23,3 +23,12 @@
   environment:
     PATH: "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
   changed_when: false
+  when:
+    - fact_python_virtualenv is not defined or fact_python_virtualenv == None
+
+- name: Ensure LIEF is working - virtualenv
+  ansible.builtin.command: "{{ fact_python_virtualenv }}/bin/python3 -c 'import lief'"
+  changed_when: false
+  when:
+    - fact_python_virtualenv is defined
+    - fact_python_virtualenv | length > 0

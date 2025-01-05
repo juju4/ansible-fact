@@ -5,7 +5,13 @@ Requires=network.target
 
 [Service]
 Type=simple
+{% if fact_python_virtualenv is defined and fact_python_virtualenv | length > 0 %}
+ExecStart={{ fact_python_virtualenv }}/bin/python {{ fact_root }}/src/start_fact_backend.py
+Environment="PATH={{ fact_python_virtualenv }}/bin:{{ ansible_env.PATH }}"
+Environment="PYTHONPATH={{ fact_python_virtualenv }}/lib/python3.12/site-packages"
+{% else %}
 ExecStart={{ fact_root }}/src/start_fact_backend.py
+{% endif %}
 WorkingDirectory={{ fact_root }}
 Restart=on-failure
 RestartSec=30
@@ -46,12 +52,12 @@ LockPersonality=true
 # When system call is disallowed, return error code instead of killing process
 SystemCallErrorNumber=EPERM
 {% endif %}
-CPUShares={{ fact_cgroups_cpushares | default('1024') }}
+CPUWeight={{ fact_cgroups_cpushares | default('1024') }}
 CPUQuota={{ fact_cgroups_cpuquota | default('80%') }}
-MemoryLimit={{ fact_cgroups_memorylimit | default('64G') }}
+MemoryMax={{ fact_cgroups_memorylimit | default('64G') }}
 
 # Network restrictions
-IPAddressAllow={{ fact_ipaddressallow | default('10.0.0.0/8 192.168.1.0/24 localhost') }}
+IPAddressAllow={{ fact_ipaddressallow | default('10.0.0.0/8 192.168.0.0/16 localhost') }}
 IPAddressDeny=any
 
 [Install]

@@ -1,5 +1,8 @@
 ---
 
+fact_python_virtualenv: /var/_fact/venv
+fact_python_virtualenv_bin: /var/_fact/venv/bin/python
+
 fact_pkgs:
   - acl
   - git
@@ -20,6 +23,10 @@ fact_pkgs:
   - unzip
   - clamav-daemon
   - jq
+  - virtualenv
+  # apt.postgresql.org
+  # - postgresql-common
+  # - postgresql-14
 
 fact_conflict_pkgs:
   - python-blinker

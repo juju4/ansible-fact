@@ -12,6 +12,7 @@
       - { h: localhost, p: 443 }
       # mongodb custom
       - { h: localhost, p: 27018 }
+    fact_python_virtualenv: /var/_fact/venv
   pre_tasks:
     - name: Not container v3 | Set fact
       ansible.builtin.set_fact:
@@ -57,10 +58,23 @@
             )
         and fact_version is regex('^4\.')
   tasks:
+    - name: Check if virtualenv
+      ansible.builtin.stat:
+        path: "{{ fact_python_virtualenv }}"
+      register: has_venv
+
     - name: Check if needed pip packages are installed
       ansible.builtin.command: "pip freeze"
       changed_when: false
       register: pip
+      when:
+        - not has_venv.stat.exists
+    - name: Check if needed pip packages are installed - virtualenv
+      ansible.builtin.command: "{{ fact_python_virtualenv }}/bin/pip freeze"
+      changed_when: false
+      register: pip
+      when:
+        - has_venv.stat.exists
 
     - name: Validate pip packages
       ansible.builtin.assert:
