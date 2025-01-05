@@ -2,6 +2,7 @@
 
 - name: Proxy
   when:
+    - proxy_env is defined
     - proxy_env|string
   block:
     # https://docs.docker.com/engine/cli/proxy/
