@@ -39,14 +39,6 @@
     create: yes
     backup: "{{ fact_backup | default(false) }}"
 
-# /var/_fact/FACT_core/src/web_interface/templates/maintenance.html
-- name: Allow nobody (nginx) to traverse home
-  ansible.posix.acl:
-    path: "{{ fact_home }}"
-    entity: nobody
-    etype: user
-    permissions: x
-
 - name: Ensure right permissions for ansible remote_tmp
   ansible.builtin.file:
     path: "{{ fact_home }}/.ansible/tmp"
@@ -135,24 +127,6 @@
     - Restart fact-backend
     - Restart fact-frontend
 
-- name: Github | review nginx.conf
-  ansible.builtin.replace:
-    dest: "{{ fact_root }}/src/config/nginx.conf"
-    regexp: "{{ item.re }}"
-    replace: "{{ item.rep }}"
-    mode: '0644'
-  with_items:
-    - { re: '^        listen   443;', rep: '        listen   443 ssl;' }
-    - { re: '^        ssl on;', rep: '        # ssl on;' }
-  when: fact_nginx_shim
-
-- name: Nginx | Ensure logs in target directory
-  ansible.builtin.replace:
-    dest: "{{ fact_root }}/src/config/nginx.conf"
-    regexp: "access_log .* compression;"
-    replace: "access_log {{ fact_logdir }}/fact_web.log compression;"
-    mode: '0644'
-
 - name: Check if marker exists
   ansible.builtin.stat:
     path: "{{ fact_root }}/.before_install_py"
@@ -185,6 +159,9 @@
 - name: Import lief
   ansible.builtin.import_tasks: lief.yml
 
+- name: Import nginx
+  ansible.builtin.import_tasks: nginx.yml
+
 - name: FACT pre-install | pip dependencies requirements_common
   ansible.builtin.pip:
     requirements: "{{ fact_root }}/src/install/requirements_common.txt"
@@ -193,14 +170,6 @@
   become: yes
   become_user: "{{ fact_user }}"
   failed_when: false
-
-- name: Fedora | Use systemctl for nginx restart
-  ansible.builtin.lineinfile:
-    dest: "{{ fact_root }}/src/install/frontend.py"
-    regexp: "^    nginx_output, nginx_code = execute_shell_command_get_return_code.'sudo (.*)'.$"
-    line: "    nginx_output, nginx_code = execute_shell_command_get_return_code('sudo systemctl restart nginx')"
-    mode: '0644'
-  when: ansible_distribution == 'Fedora'
 
 - name: Fact python installer - distutils workaround
   ansible.builtin.replace:
