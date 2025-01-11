@@ -45,6 +45,15 @@
           (ansible_virtualization_type == "docker")
         )
 
+- name: Restart nginx
+  ansible.builtin.service:
+    name: nginx
+    state: restarted
+  when: >
+    not (ansible_virtualization_type is defined and
+          (ansible_virtualization_type == "docker")
+        )
+
 - name: Users_and_passwords-update_password_list  # noqa no-changed-when
   ansible.builtin.command: python3 update_password_list.py
   args:
