@@ -63,9 +63,10 @@
     permissions: "{{ item.perm }}"
     state: present
   loop:
-    - { p: /etc/nginx/fact.key,
-        perm: r
-    }
+    # only exist after install.py
+    # - { p: /etc/nginx/fact.key,
+    #     perm: r
+    # }
     - { p: /var/log/nginx,
         perm: rwx
     }
