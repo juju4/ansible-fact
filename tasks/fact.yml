@@ -156,6 +156,19 @@
     - ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 24
     - false  # should not be needed if virtualenv is detected correctly
 
+# https://github.com/fkie-cad/FACT_core/commit/b091914596a30dff71e1bcf7c1255ecbd88979dd
+# https://github.com/fkie-cad/FACT_core/pull/769
+# https://github.com/fkie-cad/FACT_core/blob/4.2/src/install/common.py#L8
+# lost?
+- name: Ubuntu 24.04+ | Replace pkg_resources.parse_version by packaging.version.Version
+  ansible.builtin.replace:
+    dest: "{{ fact_root }}/src/install/common.py"
+    regexp: "^from pkg_resources import parse_version"
+    replace: "from packaging.version import parse as parse_version"
+    mode: '0644'
+  when:
+    - ansible_distribution == 'Ubuntu' and ansible_distribution_major_version|int >= 24
+
 - name: Import lief
   ansible.builtin.import_tasks: lief.yml
 
