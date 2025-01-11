@@ -162,9 +162,11 @@ jobs:
           ls -la /etc/nginx/nginx.conf
           cat /etc/nginx/nginx.conf
           nginx -V
-          nginx -t
-          ls -la /run/
-          sudo ls -la /var/log/nginx/
+          nginx -t || true
+          ls -la /run/ || true
+          sudo ls -la /var/log/nginx/ || true
+          sudo cat /lib/systemd/system/nginx.service || true
+          sudo cat /etc/systemd/system/nginx.service.d/override.conf || true
         if: ${{ always() }}
         continue-on-error: true
       - name: After script - curl
