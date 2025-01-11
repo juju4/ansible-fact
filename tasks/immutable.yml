@@ -1,0 +1,34 @@
+---
+## manage install when some directories are immutable
+## requires target_dir, state=pre/post
+
+- name: Check if system configured with immutable handled - juju4.harden
+  ansible.builtin.stat:
+    path: /etc/apt/apt.conf.d/99security
+  register: imm
+
+- name: Pre
+  when: state == 'pre' and imm.stat.exists
+  block:
+    ## Ansible 2.3+ for get_attributes
+    - name: Check target_dir attributes {{ target_dir }}
+      # stat:
+      #   path: "{{ target_dir }}"
+      #   get_attributes: yes
+      ansible.builtin.command:  # noqa no-changed-when
+        cmd: "lsattr -d '{{ target_dir }}'"
+      register: dir
+      changed_when: false
+
+    - name: Remove immutable attribute
+      ansible.builtin.command:  # noqa no-changed-when
+        cmd: "chattr -i '{{ target_dir }}'"
+      when: dir.stdout.find('-i-') != -1
+
+- name: Reestablish immutable attribute
+  ansible.builtin.command:  # noqa no-changed-when
+    cmd: "chattr +i '{{ target_dir }}'"
+  # file:
+  #   dest: "{{ target_dir }}"
+  #   attributes: '----i-----I--e--'
+  when: state == 'post'
