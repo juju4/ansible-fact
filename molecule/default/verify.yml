@@ -90,7 +90,7 @@
       register: ps
       changed_when: false
       failed_when: false
-    - name: Validate ps output
+    - name: Validate ps output python3
       ansible.builtin.assert:
         that: ps.stdout
       failed_when: false
@@ -99,7 +99,7 @@
       register: ps2
       changed_when: false
       failed_when: false
-    - name: Validate ps output
+    - name: Validate ps output uwsgi
       ansible.builtin.assert:
         that: ps2.stdout
       when: >
@@ -113,7 +113,7 @@
       register: ps3
       changed_when: false
       failed_when: false
-    - name: Validate ps output
+    - name: Validate ps output mongod
       ansible.builtin.assert:
         that: ps3.stdout
       when: >
@@ -292,7 +292,7 @@
       ansible.builtin.assert:
         that: >
           "'request' in rest2b.content and 'request_resource' in rest2b.content"
-    - name: Debug | Web rest output
+    - name: Debug | Web rest output test firmware
       ansible.builtin.debug:
         var: rest2b
         verbosity: 1
@@ -308,7 +308,7 @@
       ansible.builtin.assert:
         that: >
           "'system_status' in rest3.content and 'request_resource' in rest3.content"
-    - name: Debug | Web rest output
+    - name: Debug | Web rest output status
       ansible.builtin.debug:
         var: rest3
         verbosity: 1
