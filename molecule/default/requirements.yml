@@ -1,5 +1,8 @@
 ---
 
+collections:
+  - name: ansible.builtin
+
 roles:
   - name: geerlingguy.docker
   - name: geerlingguy.nodejs
