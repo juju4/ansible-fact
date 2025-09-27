@@ -92,7 +92,7 @@
       failed_when: false
     - name: Validate ps output python3
       ansible.builtin.assert:
-        that: ps.stdout
+        that: ps.stdout | length > 0
       failed_when: false
     - name: Ensure uwsgi process is running
       ansible.builtin.command: pgrep -u _fact uwsgi
