@@ -3,7 +3,7 @@
 
 fact_repo: https://github.com/fkie-cad/FACT_core.git
 # renovate: datasource=github-releases depName=fkie-cad/FACT_core
-fact_version: '4.0.1'
+fact_version: '4.1.1'
 fact_user: _fact
 fact_home: /var/_fact
 fact_root: /var/_fact/FACT_core
