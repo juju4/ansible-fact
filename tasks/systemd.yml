@@ -1,17 +1,17 @@
 ---
 
-- name: Debug | ansible_virtualization_type
+- name: Debug | ansible_facts['virtualization_type']
   ansible.builtin.debug:
-    var: ansible_virtualization_type
-- name: Debug | ansible_service_mgr
+    var: ansible_facts['virtualization_type']
+- name: Debug | ansible_facts['service_mgr']
   ansible.builtin.debug:
-    var: ansible_service_mgr
+    var: ansible_facts['service_mgr']
 
 - name: Minimum distribution release
-  # when: ansible_service_mgr == 'systemd'
+  # when: ansible_facts['service_mgr'] == 'systemd'
   when: >
-    (ansible_distribution == "Ubuntu" and ansible_distribution_major_version|int >= 16) or
-    (ansible_os_family == "RedHat" and ansible_distribution_major_version|int >= 7)
+    (ansible_facts['distribution'] == "Ubuntu" and ansible_facts['distribution_major_version']|int >= 16) or
+    (ansible_facts['os_family'] == "RedHat" and ansible_facts['distribution_major_version']|int >= 7)
   block:
 
     - name: Install systemd fact-db configuration
@@ -65,8 +65,8 @@
   notify:
     - Pause
   when: >
-    not (ansible_virtualization_type is defined and
-          (ansible_virtualization_type == "docker")
+    not (ansible_facts['virtualization_type'] is defined and
+          (ansible_facts['virtualization_type'] == "docker")
         )
 
 - name: Flush handlers

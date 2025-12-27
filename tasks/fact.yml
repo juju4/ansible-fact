@@ -5,11 +5,11 @@
   ansible.builtin.apt:
     update_cache: yes
     cache_valid_time: 3600
-  when: ansible_os_family == "Debian"
+  when: ansible_facts['os_family'] == "Debian"
 
 - name: Import redhat-mongodb
   ansible.builtin.import_tasks: redhat-mongodb.yml
-  when: ansible_os_family == "RedHat"
+  when: ansible_facts['os_family'] == "RedHat"
 
 - name: Update latest packages
   ansible.builtin.package:  # noqa package-latest
@@ -93,7 +93,7 @@
   ansible.builtin.service:
     name: clamav-daemon
     state: started
-  when: ansible_os_family == "Debian" and cvd.stat.exists
+  when: ansible_facts['os_family'] == "Debian" and cvd.stat.exists
 
 # review src/config/main.cfg, src/config/mongod.conf
 - name: Update config
@@ -145,7 +145,7 @@
     regexp: '^setuptools'
     state: absent
     mode: '0644'
-  when: ansible_distribution == 'Fedora' and ansible_distribution_major_version|int >= 35
+  when: ansible_facts['distribution'] == 'Fedora' and ansible_facts['distribution_major_version']|int >= 35
 
 - name: Import lief
   ansible.builtin.import_tasks: lief.yml
@@ -163,7 +163,7 @@
     regexp: "^    nginx_output, nginx_code = execute_shell_command_get_return_code.'sudo (.*)'.$"
     line: "    nginx_output, nginx_code = execute_shell_command_get_return_code('sudo systemctl restart nginx')"
     mode: '0644'
-  when: ansible_distribution == 'Fedora'
+  when: ansible_facts['distribution'] == 'Fedora'
 
 - name: Fact python installer - distutils workaround
   ansible.builtin.replace:
