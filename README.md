@@ -1,3 +1,8 @@
+# fkie-cad FACT_core ansible role
+
+**DEPRECATED/LOOKING FOR MAINTAINERS** -> to be archived soon
+[![No Maintenance Intended](http://unmaintained.tech/badge.svg)](http://unmaintained.tech/)
+
 [![Actions Status - Master](https://github.com/juju4/ansible-fact/workflows/AnsibleCI/badge.svg)](https://github.com/juju4/ansible-fact/actions?query=branch%3Amaster)
 [![Actions Status - Devel](https://github.com/juju4/ansible-fact/workflows/AnsibleCI/badge.svg?branch=devel)](https://github.com/juju4/ansible-fact/actions?query=branch%3Adevel)
 
@@ -7,10 +12,10 @@ This role will setup The Firmware Analysis and Comparison Tool (formerly known a
 
 It is a work in progress to translate python and shell script and provides a reasonably secure setup, mostly through IP Allow-only list and Systemd seccomp hardening.
 
-Requirements
-------------
+Alternatives
+* [Vulnerability detection framework by Binarly's REsearch team](https://github.com/vulhunt-re/vulhunt)
 
-# Requirements & Dependencies
+## Requirements & Dependencies
 
 ### Ansible
 It was tested on the following versions:
